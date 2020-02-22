@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" android:backgroundTint="#AEFFFFFF" android:fitsSystemWindows="true"
+>
+    <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
+
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent" android:background="#5778B6" android:paddingTop="12dp">
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:toolbarId="@+id/toolbar"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed"
+
+                app:contentScrim="@android:color/holo_purple" android:paddingBottom="12dp">
+
+
+            <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_width="match_parent">
+            </androidx.appcompat.widget.Toolbar>
+            <ScrollView
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layerType="hardware"
+                    android:id="@+id/scrollView2"
+                    android:foregroundTint="#2196F3"
+                    android:overScrollMode="never"
+                    android:fadeScrollbars="false" android:keepScreenOn="false"
+                    android:nestedScrollingEnabled="true"
+                    android:scrollbarAlwaysDrawHorizontalTrack="false"
+                    android:scrollbarAlwaysDrawVerticalTrack="false"
+                    android:verticalScrollbarPosition="right"
+                    android:isScrollContainer="true"
+                    android:transitionGroup="true" android:fillViewport="true"
+                    android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                    android:textAlignment="center"
+                    android:textDirection="firstStrong" android:foregroundGravity="top|center"
+                    android:layout_gravity="center|top" android:backgroundTint="#A4D9E0E7" android:background="#A1B6D3"
+            >
+                <TableLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center|top" android:gravity="center|top"
+                        android:isScrollContainer="true"
+                        android:overScrollMode="always" android:nestedScrollingEnabled="true"
+                        android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                        android:textAlignment="center"
+                        android:textDirection="firstStrong" android:verticalScrollbarPosition="right"
+                        android:foregroundGravity="top|center" android:transitionGroup="true">
+
+                    <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
+                              android:gravity="top" android:layout_gravity="center|top"
+                              android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                              android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                              android:scrollbars="vertical" android:textAlignment="center"
+                              android:textDirection="firstStrong"
+                              android:verticalScrollbarPosition="right" android:foregroundGravity="top|center"
+                              android:transitionGroup="true">
+                        <TextView
+                                android:text="Ricerca Biblica per versetti"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" android:id="@+id/textView"
+                                android:gravity="center"
+                                android:textSize="24sp" android:textStyle="bold" android:editable="false"
+                                android:layout_gravity="center|top"
+                                android:includeFontPadding="true" android:isScrollContainer="true"
+                                android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                android:textAlignment="center" android:textDirection="firstStrong"
+                                android:verticalScrollbarPosition="right" android:foregroundGravity="top|center"
+                                android:textAllCaps="true" android:paddingRight="12dp" android:paddingLeft="12dp"
+                                android:paddingTop="12dp" android:paddingBottom="6dp"/>
+                    </TableRow>
+                    <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
+                              android:foregroundGravity="top|center"
+                              android:gravity="top" android:layout_gravity="center|top"
+                              android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                              android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                              android:scrollbars="vertical" android:textAlignment="center"
+                              android:textDirection="firstStrong"
+                              android:verticalScrollbarPosition="right" android:transitionGroup="true">
+                        <AutoCompleteTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:id="@+id/autoCompleteTextView"
+                                android:hint="Libro biblico" android:gravity="center"
+                                android:layout_gravity="center|top"
+                                android:imeOptions="flagNavigateNext"
+                                android:inputType="textAutoCorrect|text|textAutoComplete"
+                                android:soundEffectsEnabled="true" android:isScrollContainer="true"
+                                android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                android:textAlignment="center" android:textDirection="firstStrong"
+                                android:verticalScrollbarPosition="right" android:foregroundGravity="top|center"
+                                android:textSize="24sp" android:textIsSelectable="true"
+                                android:hapticFeedbackEnabled="true"
+                        />
+                    </TableRow>
+                    <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
+                              android:foregroundGravity="top|center"
+                              android:gravity="top" android:layout_gravity="center|top"
+                              android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                              android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                              android:scrollbars="vertical" android:textAlignment="center"
+                              android:textDirection="firstStrong"
+                              android:verticalScrollbarPosition="right" android:transitionGroup="true">
+                        <AutoCompleteTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent" android:id="@+id/autoCompleteTextView2"
+                                android:hint="Inserisci il capitolo" android:gravity="center"
+                                android:layout_gravity="center|top"
+                                android:imeOptions="flagNavigateNext" android:inputType="number|text"
+                                android:soundEffectsEnabled="true" android:textSize="18sp"
+                                android:isScrollContainer="true"
+                                android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                android:textAlignment="center" android:textDirection="firstStrong"
+                                android:verticalScrollbarPosition="right" android:foregroundGravity="top|center"
+                                android:textIsSelectable="true"
+                                android:hapticFeedbackEnabled="true"/>
+                    </TableRow>
+                    <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
+                              android:foregroundGravity="top|center"
+                              android:gravity="top" android:layout_gravity="center|top"
+                              android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                              android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                              android:scrollbars="vertical" android:textAlignment="center"
+                              android:textDirection="firstStrong"
+                              android:verticalScrollbarPosition="right" android:transitionGroup="true">
+                        <AutoCompleteTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:id="@+id/autoCompleteTextView3"
+                                android:hint="Versetto iniziale" android:gravity="center"
+                                android:layout_gravity="center|top"
+                                android:imeOptions="flagNavigateNext" android:inputType="number|text"
+                                android:soundEffectsEnabled="true" android:textSize="18sp"
+                                android:isScrollContainer="true"
+                                android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                android:textAlignment="center" android:textDirection="firstStrong"
+                                android:verticalScrollbarPosition="right" android:foregroundGravity="top|center"
+                                android:textIsSelectable="true"
+                                android:hapticFeedbackEnabled="true"/>
+                    </TableRow>
+                    <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:foregroundGravity="top|center" android:gravity="top"
+                            android:layout_gravity="center|top"
+                            android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                            android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                            android:scrollbars="vertical"
+                            android:textAlignment="center" android:textDirection="firstStrong"
+                            android:verticalScrollbarPosition="right" android:transitionGroup="true">
+                        <AutoCompleteTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent" android:id="@+id/autoCompleteTextView4"
+                                android:hint="Versetto finale ( facoltativo)" android:gravity="center"
+                                android:layout_gravity="center|top"
+                                android:imeOptions="flagNavigateNext" android:inputType="number|text"
+                                android:soundEffectsEnabled="true" android:textSize="18sp"
+                                android:isScrollContainer="true"
+                                android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                android:textAlignment="center" android:textDirection="firstStrong"
+                                android:verticalScrollbarPosition="right" android:foregroundGravity="top|center"
+                                android:textIsSelectable="true"
+                                android:hapticFeedbackEnabled="true"/>
+                    </TableRow>
+                    <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:foregroundGravity="top|center" android:gravity="top"
+                            android:layout_gravity="center|top"
+                            android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                            android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                            android:scrollbars="vertical"
+                            android:textAlignment="center" android:textDirection="firstStrong"
+                            android:verticalScrollbarPosition="right" android:transitionGroup="true"
+                            android:paddingBottom="6dp">
+                        <Button
+                                android:text="CERCA"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" android:id="@+id/button"
+                                android:layout_gravity="center|top" android:imeOptions="actionGo|actionSend"
+                                android:soundEffectsEnabled="true" android:textIsSelectable="false"
+                                android:clickable="true"
+                                android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                                android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                                android:scrollbars="vertical" android:textAlignment="center"
+                                android:textDirection="firstStrong" android:verticalScrollbarPosition="right"
+                                android:foregroundGravity="top|center" android:textSize="18sp"
+                                android:hapticFeedbackEnabled="true"/>
+                    </TableRow>
+                </TableLayout>
+            </ScrollView>
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+    <androidx.core.widget.NestedScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" android:paddingBottom="12dp"
+            android:paddingLeft="12dp" android:paddingRight="12dp" android:background="#5778B6">
+        <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:background="#A1B6D3">
+
+            <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
+                      android:background="#AEFFFFFF">
+                <ScrollView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/scrollView4"
+                        android:fillViewport="true" android:isScrollContainer="true" android:overScrollMode="always"
+                        android:layerType="hardware" android:outlineProvider="bounds"
+                        android:nestedScrollingEnabled="true" android:requiresFadingEdge="vertical"
+                        android:scrollbars="vertical"
+                        android:textAlignment="center" android:textDirection="firstStrong"
+                        android:verticalScrollbarPosition="right" android:foregroundGravity="center"
+                        android:layout_gravity="bottom|center">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                                  android:orientation="vertical" android:gravity="bottom"
+                                  android:foregroundGravity="bottom"
+                                  android:layout_gravity="bottom" android:isScrollContainer="true"
+                                  android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                  android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                  android:textAlignment="center" android:textDirection="firstStrong"
+                                  android:verticalScrollbarPosition="right">
+                        <androidx.constraintlayout.widget.Guideline
+                                android:orientation="horizontal"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" android:id="@+id/guideline"
+                                android:isScrollContainer="true"
+                                android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                android:textAlignment="center"
+                                android:textDirection="firstStrong" android:verticalScrollbarPosition="right"
+                                android:layout_gravity="bottom|center" android:foregroundGravity="center"/>
+                        <TableLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:isScrollContainer="true"
+                                android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                android:textAlignment="center"
+                                android:textDirection="firstStrong" android:verticalScrollbarPosition="right"
+                                android:gravity="bottom" android:layout_gravity="bottom"
+                                android:foregroundGravity="bottom">
+                            <TableRow
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:foregroundGravity="bottom" android:gravity="bottom"
+                                    android:layout_gravity="bottom"
+                                    android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                                    android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                                    android:scrollbars="vertical" android:textAlignment="center"
+                                    android:textDirection="firstStrong" android:verticalScrollbarPosition="right">
+                                <ScrollView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" android:fillViewport="true"
+                                        android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                                        android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                                        android:scrollbars="vertical" android:textAlignment="center"
+                                        android:textDirection="firstStrong" android:verticalScrollbarPosition="right"
+                                        android:layout_gravity="bottom" android:foregroundGravity="bottom">
+                                    <LinearLayout android:layout_width="match_parent"
+                                                  android:layout_height="match_parent"
+                                                  android:orientation="vertical" android:isScrollContainer="true"
+                                                  android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                                  android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                                  android:textAlignment="center" android:textDirection="firstStrong"
+                                                  android:verticalScrollbarPosition="right" android:gravity="bottom"
+                                                  android:layout_gravity="bottom"
+                                                  android:foregroundGravity="bottom">
+                                        <MultiAutoCompleteTextView
+                                                android:id="@+id/multiAutoCompleteTextView"
+                                                android:layout_width="match_parent"
+                                                android:layout_height="match_parent"
+                                                android:hint="Risultato della ricerca"
+                                                android:gravity="bottom" android:layout_gravity="bottom"
+                                                android:paddingRight="@dimen/fab_margin"
+                                                android:paddingLeft="@dimen/fab_margin"
+                                                android:overScrollMode="always" android:foregroundGravity="bottom"
+                                                android:saveEnabled="true"
+                                                android:layerType="hardware"
+                                                android:scrollHorizontally="false"
+                                                android:textStyle="normal" android:textSize="18sp"
+                                                android:textAlignment="center" android:textIsSelectable="true"
+                                                android:clickable="false"
+                                                android:dropDownWidth="wrap_content" android:includeFontPadding="true"
+                                                android:nestedScrollingEnabled="true"
+                                                android:verticalScrollbarPosition="right"
+                                                android:typeface="normal" android:isScrollContainer="true"
+                                                android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                                android:textDirection="firstStrong"
+                                        />
+                                    </LinearLayout>
+                                </ScrollView>
+                            </TableRow>
+                            <TableRow
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:foregroundGravity="bottom" android:gravity="bottom|center"
+                                    android:layout_gravity="bottom"
+                                    android:orientation="horizontal" android:isScrollContainer="true"
+                                    android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                    android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                    android:textAlignment="center" android:textDirection="firstStrong"
+                                    android:verticalScrollbarPosition="right" android:layout_weight="0.5">
+                                <androidx.constraintlayout.widget.Guideline
+                                        android:orientation="horizontal"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" android:id="@+id/guideline3"
+                                        android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                                        android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                                        android:scrollbars="vertical" android:textAlignment="center"
+                                        android:textDirection="firstStrong" android:verticalScrollbarPosition="right"
+                                        android:layout_gravity="bottom" android:foregroundGravity="bottom"/>
+                                <ImageButton
+                                        android:layout_height="60dp" app:srcCompat="@mipmap/pngitem_1485047"
+                                        android:id="@+id/imageButton" android:scaleType="centerInside"
+                                        android:layout_gravity="bottom|center"
+                                        android:layout_width="60dp"
+                                        android:layout_marginTop="2dp"
+                                        android:layout_marginBottom="2dp" android:soundEffectsEnabled="true"
+                                        android:clickable="true" android:longClickable="true"
+                                        android:isScrollContainer="true"
+                                        android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                        android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                        android:textAlignment="center" android:textDirection="firstStrong"
+                                        android:verticalScrollbarPosition="right"/>
+                            </TableRow>
+                        </TableLayout>
+                    </LinearLayout>
+                </ScrollView>
+            </TableRow>
+            <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
+                      android:paddingTop="12dp" android:background="#5778B6">
+                <ScrollView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/scrollView3"
+                        android:fillViewport="true"
+                        android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                        android:overScrollMode="always"
+                        android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                        android:textAlignment="center"
+                        android:textDirection="firstStrong" android:verticalScrollbarPosition="right"
+                        android:layerType="hardware"
+                        android:foregroundGravity="bottom" android:layout_gravity="bottom">
+                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                  android:orientation="vertical" android:foregroundGravity="bottom"
+                                  android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                                  android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                                  android:scrollbars="vertical" android:textAlignment="center"
+                                  android:textDirection="firstStrong"
+                                  android:verticalScrollbarPosition="right" android:layout_gravity="bottom"
+                                  android:gravity="bottom">
+                        <TableRow
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:gravity="bottom"
+                                android:foregroundGravity="bottom"
+                                android:isScrollContainer="true" android:nestedScrollingEnabled="true"
+                                android:overScrollMode="always" android:requiresFadingEdge="vertical"
+                                android:scrollbars="vertical"
+                                android:textAlignment="center" android:textDirection="firstStrong"
+                                android:verticalScrollbarPosition="right" android:layout_gravity="bottom"
+                        >
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:id="@+id/textView2"
+                                    android:text="@string/Avvertenze" android:gravity="bottom"
+                                    android:editable="false"
+                                    android:duplicateParentState="false" android:fadeScrollbars="false"
+                                    android:focusableInTouchMode="true" android:layout_marginStart="8dp"
+                                    android:layout_marginEnd="8dp"
+                                    android:isScrollContainer="true"
+                                    android:nestedScrollingEnabled="true" android:overScrollMode="always"
+                                    android:requiresFadingEdge="vertical" android:scrollbars="vertical"
+                                    android:textAlignment="center" android:textDirection="firstStrong"
+                                    android:verticalScrollbarPosition="right" android:layout_gravity="bottom"
+                                    android:foregroundGravity="bottom" android:layout_weight="0.5"
+                                    android:visibility="visible" android:cursorVisible="true"
+                                    android:background="#B0FFFFFF" android:paddingRight="9dp"
+                                    android:paddingLeft="9dp" android:paddingTop="6dp" android:paddingBottom="6dp"/>
+                        </TableRow>
+                    </LinearLayout>
+                </ScrollView>
+            </TableRow>
+        </TableLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
