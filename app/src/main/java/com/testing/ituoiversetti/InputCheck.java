@@ -34,10 +34,15 @@ public class InputCheck {
         if (i.contains("Canticodei Cantici")) i = i.replace("Canticodei Cantici", "Cantico dei Cantici");
         if (i.contains("Cantico deiCantici")) i = i.replace("Cantico deiCantici", "Cantico dei Cantici");
         if (i.contains("2Samuele")) i = i.replace("2Samuele", "2 Samuele");
+        if (i.contains("2samuele")) i = i.replace("2samuele", "2 Samuele");
         if (i.contains("1Tessalonicesi")) i = i.replace("1Tessalonicesi", "1 Tessalonicesi");
         if (i.contains("2Tessalonicesi")) i = i.replace("2Tessalonicesi", "2 Tessalonicesi");
         if (i.contains("1Corinti")) i = i.replace("1Corinti", "1 Corinti");
+        if (i.contains("1corinti")) i = i.replace("1corinti", "1 Corinti");
+        if (i.contains("1 corinti")) i = i.replace("1 corinti", "1 Corinti");
         if (i.contains("2Corinti")) i = i.replace("2Corinti", "2 Corinti");
+        if (i.contains("2 corinti")) i = i.replace("2 corinti", "2 Corinti");
+        if (i.contains("2corinti")) i = i.replace("2corinti", "2 Corinti");
         if (i.contains("1Giovanni")) i = i.replace("1Giovanni", "1 Giovanni");
         if (i.contains("2Giovanni")) i = i.replace("2Giovanni", "2 Giovanni");
         if (i.contains("3Giovanni")) i = i.replace("3Giovanni", "3 Giovanni");
@@ -45,7 +50,8 @@ public class InputCheck {
         if (i.contains("  ")) i = i.replaceAll("  ", " ");
         if (i.startsWith(" ")) i = i.substring(1);
         if (i.endsWith(" ")) i = removeLastChar(i);
-        if (Character.isLowerCase(i.charAt(0))) i = capitalize(i);
+        if (Character.isLowerCase(i.charAt(0))&Character.isAlphabetic(i.charAt(0))) i = capitalize(i);
+        if (Character.isLowerCase(i.charAt(2))&Character.isDigit(i.charAt(0))) i.toUpperCase().charAt(1);
         System.out.println("Richiesta accettata = " + i);
         corrLib=i;
         return corrLib;

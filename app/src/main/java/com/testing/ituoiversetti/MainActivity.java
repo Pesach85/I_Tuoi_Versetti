@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button button = (Button) findViewById(R.id.button);
+        final Button button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                mEdit[4] = (EditText)findViewById(R.id.multiAutoCompleteTextView);
+                mEdit[4] = findViewById(R.id.multiAutoCompleteTextView);
                 try {
                     mEdit[4].setText(new StringBuilder().append(libro).append(" ")
                             .append(capitolo).append(": ").append(testo));
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final ImageButton button1 = (ImageButton) findViewById(R.id.imageButton);
+        final ImageButton button1 = findViewById(R.id.imageButton);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
                 whatsappIntent.setType("text/plain");
                 whatsappIntent.setPackage("com.whatsapp");
-                whatsappIntent.putExtra(Intent.EXTRA_TEXT, libro+" "+capitolo+": "+testo);
+                whatsappIntent.putExtra(Intent.EXTRA_TEXT, mEdit[4].getText().toString());
                 try {
                     Objects.requireNonNull(MainActivity.this).startActivity(whatsappIntent);
                 } catch (android.content.ActivityNotFoundException ex) {
