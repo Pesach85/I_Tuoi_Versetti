@@ -385,7 +385,7 @@
                                 android:background="@drawable/corners" android:paddingRight="9dp"
                                 android:paddingLeft="9dp" android:paddingTop="6dp" android:paddingBottom="6dp"
                                 android:backgroundTint="#D0D5DBE0" android:textSize="16sp"
-                                android:autofillHints="" tools:targetApi="o" android:inputType="textMultiLine"/>
+                                android:autofillHints="" android:inputType="textMultiLine"/>
                     </LinearLayout>
                 </ScrollView>
             </TableRow>

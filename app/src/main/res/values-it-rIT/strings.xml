@@ -1,3 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ricerca_biblica_per_versetti">Ricerca Biblica per versetti</string>
+    <string name="libro_biblico">Libro biblico</string>
+    <string name="versetto_finale_facoltativo">Versetto finale ( facoltativo)</string>
+    <string name="inserisci_il_capitolo">Inserisci il capitolo</string>
+    <string name="todo">TODO</string>
+    <string name="versetto_iniziale">Versetto iniziale</string>
+    <string name="cerca">CERCA</string>
+    <string name="risultato_della_ricerca">Risultato della ricerca</string>
 </resources>
