@@ -384,7 +384,7 @@
                                 android:visibility="visible" android:cursorVisible="false"
                                 android:background="@drawable/corners" android:paddingRight="9dp"
                                 android:paddingLeft="9dp" android:paddingTop="6dp" android:paddingBottom="6dp"
-                                android:backgroundTint="#D0D5DBE0" android:textSize="16sp"
+                                android:backgroundTint="#D0D5DBE0" android:textSize="14sp"
                                 android:autofillHints="" android:inputType="textMultiLine"/>
                     </LinearLayout>
                 </ScrollView>
