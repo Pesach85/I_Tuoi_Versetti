@@ -9,7 +9,6 @@ import java.util.Collection;
  * @author Pasquale Edmondo Lombardi under Open Source license. plombardi85@gmail.com
  */
 public class Capitolo extends Bibbia {
-
     protected ArrayList<Integer> getCapitoli() {
         return capitoli;
     }
@@ -28,6 +27,6 @@ public class Capitolo extends Bibbia {
      capitoli.addAll(capitolo);
     }
 
-
-
 }
+
+

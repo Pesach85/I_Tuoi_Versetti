@@ -4,22 +4,24 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
  * @author Pasquale Edmondo Lombardi under Open Source license. plombardi85@gmail.com
  */
 public class MainActivity extends AppCompatActivity {
-    EditText[] mEdit = new EditText[5];
+    AutoCompleteTextView[] mEdit = new AutoCompleteTextView[5];
+    ArrayAdapter<String> arrayAdapter;
+    ArrayAdapter<Integer> arrayAdapter2;
     String libro = "";
     Integer capitolo = 0;
     Integer versetto_in = 0;
@@ -37,19 +39,35 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mEdit[0] = new MultiAutoCompleteTextView(this);
+        mEdit[1] = new MultiAutoCompleteTextView(this);
+
+        // Create a new data adapter object.
+        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, bibbia.composeBibbia());
+
+//        try {
+//            arrayAdapter2 = new ArrayAdapter<Integer>(this, android.R.layout.simple_dropdown_item_1line, checkLibro());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        // Must set tokenizer for MultiAutoCompleteTextView object, otherwise it will not take effect.
+        mEdit[0] = findViewById(R.id.autoCompleteTextView);
+        mEdit[1] = findViewById(R.id.autoCompleteTextView2);
+        mEdit[2] = findViewById(R.id.autoCompleteTextView3);
+        mEdit[3] = findViewById(R.id.autoCompleteTextView4);
+
+        mEdit[0].setAdapter(arrayAdapter);
+
+//        mEdit[1].setAdapter(arrayAdapter2);
 
         final Button button = findViewById(R.id.button);
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mEdit = new EditText[5];
                 testo = "";
                 libro = ""; capitolo = 0; versetto_in = 0; versetto_final = 0;
-                // your handler code here
-                mEdit[0] = findViewById(R.id.autoCompleteTextView);
-                mEdit[1] = findViewById(R.id.autoCompleteTextView2);
-                mEdit[2] = findViewById(R.id.autoCompleteTextView3);
-                mEdit[3] = findViewById(R.id.autoCompleteTextView4);
                 libro = mEdit[0].getText().toString();
                 libro = ok.setTitoloCorrected(libro);
                 capitolo = Integer.parseInt(mEdit[1].getText().toString());
@@ -122,5 +140,15 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+//   public ArrayList<Integer> checkLibro() throws IOException {
+//        NumCapitoli nuovo = new NumCapitoli();
+//        ArrayList<Integer> temp = new ArrayList<Integer>();
+//        temp.add(0);
+//        if (libro.length()>2&&capitolo>0){
+//            return nuovo.createCapN(libro);
+//        }
+//        else return temp;
+//    }
 
 }
