@@ -9,7 +9,7 @@ The use of Jsoup libraries is under terms of condition.
 
 Author is Pasquale Edmondo Lombardi, you can contact me at email plombardi85@gmail.com
 
-Hopefully, if tall this work will please God, i'll have soon a google developer account to make a serious developing project.
+Hopefully, if this work will please God, i'll have soon a google developer account to make a serious developing project.
 
 This is my personal effort to help the purpose of global instruction about Jehovah and his wonderful purpose for humankind.
 All the things we give comes from God and to God we give back, so if i cannot help people to increase faith, i can
