@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,7 +11,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -21,7 +19,6 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
     AutoCompleteTextView[] mEdit = new AutoCompleteTextView[5];
     ArrayAdapter<String> arrayAdapter;
-    ArrayAdapter<Integer> arrayAdapter2;
     String libro = "";
     Integer capitolo = 0;
     Integer versetto_in = 0;
@@ -45,13 +42,6 @@ public class MainActivity extends AppCompatActivity {
         // Create a new data adapter object.
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, bibbia.composeBibbia());
 
-//        try {
-//            arrayAdapter2 = new ArrayAdapter<Integer>(this, android.R.layout.simple_dropdown_item_1line, checkLibro());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-        // Must set tokenizer for MultiAutoCompleteTextView object, otherwise it will not take effect.
         mEdit[0] = findViewById(R.id.autoCompleteTextView);
         mEdit[1] = findViewById(R.id.autoCompleteTextView2);
         mEdit[2] = findViewById(R.id.autoCompleteTextView3);
@@ -59,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
         mEdit[0].setAdapter(arrayAdapter);
 
-//        mEdit[1].setAdapter(arrayAdapter2);
 
         final Button button = findViewById(R.id.button);
 
@@ -70,6 +59,11 @@ public class MainActivity extends AppCompatActivity {
                 libro = ""; capitolo = 0; versetto_in = 0; versetto_final = 0;
                 libro = mEdit[0].getText().toString();
                 libro = ok.setTitoloCorrected(libro);
+                try {
+                    new NumCapitoli().selectCapN(libro);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 capitolo = Integer.parseInt(mEdit[1].getText().toString());
                 try {
                     capitolo = ok.setCapitoloCorrected(capitolo);
@@ -140,15 +134,5 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-//   public ArrayList<Integer> checkLibro() throws IOException {
-//        NumCapitoli nuovo = new NumCapitoli();
-//        ArrayList<Integer> temp = new ArrayList<Integer>();
-//        temp.add(0);
-//        if (libro.length()>2&&capitolo>0){
-//            return nuovo.createCapN(libro);
-//        }
-//        else return temp;
-//    }
 
 }

@@ -19,7 +19,7 @@
                 app:toolbarId="@+id/toolbar"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
 
-                app:contentScrim="@android:color/holo_purple" android:paddingBottom="12dp">
+                app:contentScrim="#418C8DC0" android:paddingBottom="12dp">
 
 
             <androidx.appcompat.widget.Toolbar
@@ -103,7 +103,7 @@
                                 android:verticalScrollbarPosition="right" android:foregroundGravity="top|center"
                                 android:textSize="24sp" android:textIsSelectable="true"
                                 android:hapticFeedbackEnabled="true"
-                        />
+                                android:completionThreshold="1"/>
                     </TableRow>
                     <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
                               android:foregroundGravity="top|center"
@@ -115,10 +115,11 @@
                               android:verticalScrollbarPosition="right" android:transitionGroup="true">
                         <AutoCompleteTextView
                                 android:layout_width="wrap_content"
-                                android:layout_height="match_parent" android:id="@+id/autoCompleteTextView2"
+                                android:layout_height="wrap_content" android:id="@+id/autoCompleteTextView2"
                                 android:hint="@string/inserisci_il_capitolo" android:gravity="center"
                                 android:layout_gravity="center|top"
-                                android:imeOptions="flagNavigateNext" android:inputType="number|text"
+                                android:imeOptions="flagNavigateNext"
+                                android:inputType="textAutoCorrect|number|text|textAutoComplete"
                                 android:soundEffectsEnabled="true" android:textSize="18sp"
                                 android:isScrollContainer="true"
                                 android:nestedScrollingEnabled="true" android:overScrollMode="always"
@@ -126,7 +127,7 @@
                                 android:textAlignment="center" android:textDirection="firstStrong"
                                 android:verticalScrollbarPosition="right" android:foregroundGravity="top|center"
                                 android:textIsSelectable="true"
-                                android:hapticFeedbackEnabled="true"/>
+                                android:hapticFeedbackEnabled="true" android:completionThreshold="1"/>
                     </TableRow>
                     <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
                               android:foregroundGravity="top|center"
@@ -163,7 +164,7 @@
                             android:verticalScrollbarPosition="right" android:transitionGroup="true">
                         <AutoCompleteTextView
                                 android:layout_width="wrap_content"
-                                android:layout_height="match_parent" android:id="@+id/autoCompleteTextView4"
+                                android:layout_height="wrap_content" android:id="@+id/autoCompleteTextView4"
                                 android:hint="@string/versetto_finale_facoltativo" android:gravity="center"
                                 android:layout_gravity="center|top"
                                 android:imeOptions="flagNavigateNext" android:inputType="number|text"
