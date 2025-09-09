@@ -16,10 +16,6 @@ public class NumCapitoli extends Capitolo {
         nuovo.createNumCap();
     }
 
-    public ArrayList<String> getCaps(){
-        return caps;
-    }
-
     protected void selectCapN(String s) throws IOException {
         switch (s) {
             case "Genesi":

@@ -14,104 +14,123 @@ public class Bibbia {
 
     static int MAXLENGHTVERS = 7;
 
-    private int aCon;
-    private String result = "";
-    private String result2 = "";
-    private ArrayList<String> ids;
-    private String id = "";
-    private String bible = "https://wol.jw.org/it/wol/b/r6/lp-i/nwtsty";
+    private final String bible = "https://wol.jw.org/it/wol/b/r6/lp-i/nwtsty";
     private int num_libro;
-    private ArrayList<String> bibbia;
-    private List<String> titolo_libri;
     private String testo = "";
     private String bibleTemp = "";
     private int temp;
     private int temp2;
 
 
-    Bibbia() throws IOException {
+    Bibbia() {
         composeBibbia();
     }
 
     protected String getWebContent(String a, int b, int c) throws IOException {
-        result2 = ""; bibleTemp = "";
+        String result2 = "";
+        bibleTemp = "";
         bibleTemp = bible;
-        bibleTemp = bibleTemp.concat(new StringBuilder().append("/").append(convertLibro(a)).append("/").append(b).append("#study=discover&v=").append(convertLibro(a)).append(":").append(b).append(":").append(c).toString());
-        Connection conn = Jsoup.connect(bibleTemp);
-        Document doc = conn.get();
-        for (int i = 1; i < 6; i++) {
-            String id2 = new StringBuilder().append("v").append(convertLibro(a)).append("-").append(b).append("-").append(c).append("-").append(i).toString();
-            try {
-                if (doc.getElementById(id2).text() != null) result2 += doc.getElementById(id2).text()+" ";
-                else break;
-            } catch (NullPointerException h) {};
+        int chap = convertLibro(a);
+
+        bibleTemp = bibleTemp.concat("/" + chap + "/" + b + "#study=discover&v=" + chap + ":" + b + ":" + c);
+        JsoupParser js = new JsoupParser(bibleTemp);
+
+        if (200 == js.res.statusCode()) {
+            Document doc = js.res.parse();
+
+            for (int i = 1; i < 6; i++) {
+                String id2 = "v" + chap + "-" + b + "-" + c + "-" + i;
+                try {
+                    if (!Objects.requireNonNull(doc.getElementById(id2)).text().equals(""))
+                        result2 += Objects.requireNonNull(doc.getElementById(id2)).text() + " ";
+                    else break;
+                } catch (NullPointerException ignored) {
+                }
+
+            }
+            this.testo = result2.replaceAll("[+*]", "");
+            if (c == 1) this.testo = testo.substring(2);
         }
-        this.testo = result2.replaceAll("[+*]", "");
-        if (c==1) this.testo = testo.substring(2);
+        else {
+            this.testo = " no connection";
+        }
         return testo;
     }
 
     protected String getWebContent(String a, int b, int c, int d) throws IOException {
-        bibleTemp = ""; testo=""; result = ""; aCon = 0;
+        bibleTemp = ""; testo="";
+        StringBuilder result = new StringBuilder();
+        int aCon;
         bibleTemp = bible;
         aCon = convertLibro(a);
-        bibleTemp = bibleTemp.concat(new StringBuilder().append("/").append(aCon).append("/").append(b).append("#study=discover&v=")
-                                .append(aCon).append(":").append(b).append(":").append(c).append("-").append(aCon).append(":")
-                                .append(b).append(":").append(d).toString());
-        Connection conn = Jsoup.connect(this.bibleTemp);
-        Document doc = conn.get();
+        bibleTemp = bibleTemp.concat("/" + aCon + "/" + b + "#study=discover&v=" +
+                aCon + ":" + b + ":" + c + "-" + aCon + ":" +
+                b + ":" + d);
 
-        ids = new ArrayList<String>();
+        Connection.Response response= Jsoup.connect(this.bibleTemp)
+                .ignoreContentType(true)
+                .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21")
+                .header("Accept-Language", "it-IT")
+                .referrer("http://www.google.com")
+                .timeout(20000)
+                .followRedirects(true)
+                .execute();
+        if (200 == response.statusCode()) {
+            Document doc = response.parse();
 
-        for (int i = 0; i<=(d-c); i++) {
+            ArrayList<String> ids = new ArrayList<>();
 
-            for (int j = 1; j < MAXLENGHTVERS; j++) {
-                this.id = new StringBuilder().append("v").append(aCon).append("-").append(b).append("-")
-                                             .append(c + i).append("-").append(j).toString();
+            for (int i = 0; i <= (d - c); i++) {
+
+                for (int j = 1; j < MAXLENGHTVERS; j++) {
+                    String id = "v" + aCon + "-" + b + "-" +
+                            (c + i) + "-" + j;
+                    try {
+                        if (!Objects.requireNonNull(doc.getElementById(id)).text().equals("")) {
+                            ids.add(id);
+                            temp++;
+                        } else {
+                            break;
+                        }
+                    } catch (NullPointerException ignored) {
+                    }
+                }
+                temp2++;
+            }
+
+            for (int i = 0; i < (temp + temp2); i++) {
                 try {
-                    if (doc.getElementById(id).text() != null) {
-                        this.ids.add(id);
-                        temp++;
-                    }
-                    else {
-                        break;
-                    }
-                } catch (NullPointerException h) {
+                    result.append(Objects.requireNonNull(doc.getElementById(ids.get(i))).text()).append(" ");
+                } catch (IndexOutOfBoundsException ignored) {
                 }
             }
-            temp2++;
-        }
 
-        for(int i = 0; i<(temp+temp2); i++) {
-           try {
-               this.result += doc.getElementById(ids.get(i)).text()+" ";
-           } catch (IndexOutOfBoundsException j) {}
+            this.testo = result.toString().replaceAll("[+*]", "");
+            if ((c == 1) && (this.testo != null)) this.testo = testo.substring(2);
         }
-
-        this.testo = result.replaceAll("[+*]", "");
-        if ((c==1)&&(this.testo!=null)) this.testo = testo.substring(2);
+        else {
+            this.testo = " no connection";
+        }
         return this.testo;
     }
 
     protected ArrayList<String> composeBibbia() {
-        titolo_libri = Arrays.asList("Genesi","Esodo","Levitico", "Numeri", "Deuteronomio", "Giosuè", "Giudici", "Rut",
-                "1 Samuele","2 Samuele", "1 Re", "2 Re", "1 Cronache", "2 Cronache", "Esdra", "Neemia",
+        List<String> titolo_libri = Arrays.asList("Genesi", "Esodo", "Levitico", "Numeri", "Deuteronomio", "Giosuè", "Giudici", "Rut",
+                "1 Samuele", "2 Samuele", "1 Re", "2 Re", "1 Cronache", "2 Cronache", "Esdra", "Neemia",
                 "Ester", "Giobbe", "Salmi", "Proverbi", "Ecclesiaste", "Cantico dei Cantici", "Isaia",
                 "Geremia", "Lamentazioni", "Ezechiele", "Daniele", "Osea", "Gioele", "Amos", "Abdia",
                 "Giona", "Michea", "Naum", "Abacuc", "Sofonia", "Aggeo", "Zaccaria", "Malachia",
-                "Matteo","Marco","Luca","Giovanni","Atti","Romani","1 Corinti","2 Corinti", "Galati",
+                "Matteo", "Marco", "Luca", "Giovanni", "Atti", "Romani", "1 Corinti", "2 Corinti", "Galati",
                 "Efesini", "Filippesi", "Colossesi", "1 Tessalonicesi", "2 Tessalonicesi", "1 Timoteo",
                 "2 Timoteo", "Tito", "Filemone", "Ebrei", "Giacomo", "1 Pietro", "2 Pietro", "1 Giovanni", "2 Giovanni",
                 "3 Giovanni", "Giuda", "Rivelazione");
-        this.bibbia = new ArrayList<String>();
-        this.bibbia.addAll(titolo_libri);
-        return this.bibbia;
+        return new ArrayList<>(titolo_libri);
     }
 
     protected int convertLibro(String a){
         for (int i = 0; i<composeBibbia().size(); i++)
         {
-            if (composeBibbia().get(i).indexOf(a)!=-1) {
+            if (composeBibbia().get(i).contains(a)) {
                 this.num_libro = i;
                 break;
             }
