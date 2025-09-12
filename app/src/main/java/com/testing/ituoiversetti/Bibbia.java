@@ -3,7 +3,6 @@ package com.testing.ituoiversetti;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.parser.StreamParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -51,7 +50,6 @@ public class Bibbia {
                 b + ":" + d);
 
 
-        JsoupParser js = new JsoupParser();
         js.execute();
 
         // Thread downloadThread = new Thread(new Runnable() {
@@ -101,7 +99,7 @@ public class Bibbia {
         //});
 
 
-        ArrayList<String> ids = new ArrayList<String>();
+        ArrayList<String> ids = new ArrayList<>();
 
         for (int i = 0; i<=(d-c); i++) {
 
