@@ -3,6 +3,7 @@ package com.testing.ituoiversetti;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.parser.StreamParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -14,104 +15,126 @@ public class Bibbia {
 
     static int MAXLENGHTVERS = 7;
 
-    private final String bible = "https://wol.jw.org/it/wol/b/r6/lp-i/nwtsty";
-    private int num_libro;
-    private String testo = "";
-    private String bibleTemp = "";
-    private int temp;
-    private int temp2;
+    private int num_libro = 0;
+
+    JsoupParser js = new JsoupParser();
+
+    Document doc = null;
+    Connection.Response res = null;
+
+    public boolean search = false;
+
+    public String src = "";
 
 
     Bibbia() {
         composeBibbia();
     }
 
-    protected String getWebContent(String a, int b, int c) throws IOException {
-        String result2 = "";
-        bibleTemp = "";
-        bibleTemp = bible;
-        int chap = convertLibro(a);
 
-        bibleTemp = bibleTemp.concat("/" + chap + "/" + b + "#study=discover&v=" + chap + ":" + b + ":" + c);
-        JsoupParser js = new JsoupParser(bibleTemp);
+    public void getWebContent(String a, int b, int c, int d) throws IOException {
+        int temp = 0;
+        int temp2 = 0;
 
-        if (200 == js.res.statusCode()) {
-            Document doc = js.res.parse();
+        String bibleTemp = "https://wol.jw.org/it/wol/b/r6/lp-i/nwtsty";
+        String testo2 = "";
+        String result = "";
 
-            for (int i = 1; i < 6; i++) {
-                String id2 = "v" + chap + "-" + b + "-" + c + "-" + i;
-                try {
-                    if (!Objects.requireNonNull(doc.getElementById(id2)).text().equals(""))
-                        result2 += Objects.requireNonNull(doc.getElementById(id2)).text() + " ";
-                    else break;
-                } catch (NullPointerException ignored) {
-                }
+        String userAgent = System.getProperty("http.agent");
 
-            }
-            this.testo = result2.replaceAll("[+*]", "");
-            if (c == 1) this.testo = testo.substring(2);
-        }
-        else {
-            this.testo = " no connection";
-        }
-        return testo;
-    }
+        int aCon = 0;
 
-    protected String getWebContent(String a, int b, int c, int d) throws IOException {
-        bibleTemp = ""; testo="";
-        StringBuilder result = new StringBuilder();
-        int aCon;
-        bibleTemp = bible;
         aCon = convertLibro(a);
+
         bibleTemp = bibleTemp.concat("/" + aCon + "/" + b + "#study=discover&v=" +
                 aCon + ":" + b + ":" + c + "-" + aCon + ":" +
                 b + ":" + d);
 
-        Connection.Response response= Jsoup.connect(this.bibleTemp)
-                .ignoreContentType(true)
-                .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21")
-                .header("Accept-Language", "it-IT")
-                .referrer("http://www.google.com")
-                .timeout(20000)
-                .followRedirects(true)
-                .execute();
-        if (200 == response.statusCode()) {
-            Document doc = response.parse();
 
-            ArrayList<String> ids = new ArrayList<>();
+        JsoupParser js = new JsoupParser();
+        js.execute();
 
-            for (int i = 0; i <= (d - c); i++) {
+        // Thread downloadThread = new Thread(new Runnable() {
+        Connection conn = Jsoup.connect(bibleTemp);
 
-                for (int j = 1; j < MAXLENGHTVERS; j++) {
-                    String id = "v" + aCon + "-" + b + "-" +
-                            (c + i) + "-" + j;
-                    try {
-                        if (!Objects.requireNonNull(doc.getElementById(id)).text().equals("")) {
-                            ids.add(id);
-                            temp++;
-                        } else {
-                            break;
-                        }
-                    } catch (NullPointerException ignored) {
-                    }
-                }
-                temp2++;
+        while (res == null) {
+        //while (doc == null) {
+            try
+            {
+            res = conn
+                //doc = conn
+                    .userAgent(userAgent)
+                    .referrer("https://wol.jw.org/it/wol/binav/r6/lp-i/nwtsty")
+                    .ignoreContentType(true)
+                    .header(":authority", "wol.jw.org")
+                    .header(":method", "GET")
+                    .header(":path", "/wol/ls?locale=it&type=documentOptions&wtlocale=I")
+                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+                    .header("Accept-Encoding", "gzip, deflate, br, zstd")
+                    .header("Accept-Language", "it,it-IT;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
+                    .header("Cookie", "cookieConsent-STRICTLY_NECESSARY=true; cookieConsent-FUNCTIONAL=true; cookieConsent-DIAGNOSTIC=true; cookieConsent-USAGE=true;")
+                    .timeout(12000)
+                    .maxBodySize(0)
+                    .ignoreHttpErrors(true)
+                    .followRedirects(true)//.get();
+                    .execute();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
             }
 
-            for (int i = 0; i < (temp + temp2); i++) {
+        }
+
+        while (doc == null) {
+                try
+                {
+                doc = res.parse();
+                }
+
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+        }
+
+        //});
+
+
+        ArrayList<String> ids = new ArrayList<String>();
+
+        for (int i = 0; i<=(d-c); i++) {
+
+            for (int j = 1; j < MAXLENGHTVERS; j++) {
+                String id = "v" + aCon + "-" + b + "-" +
+                        (c + i) + "-" + j;
                 try {
-                    result.append(Objects.requireNonNull(doc.getElementById(ids.get(i))).text()).append(" ");
-                } catch (IndexOutOfBoundsException ignored) {
+                    if (doc.getElementById(id).text() != null) {
+                        ids.add(id);
+                        temp++;
+                    }
+                    else {
+                        break;
+                    }
+                } catch (NullPointerException ignored) {
                 }
             }
+            temp2++;
+        }
 
-            this.testo = result.toString().replaceAll("[+*]", "");
-            if ((c == 1) && (this.testo != null)) this.testo = testo.substring(2);
+        for(int i = 0; i<(temp+temp2); i++) {
+            try {
+                result = result.concat(doc.getElementById(ids.get(i)).text() + " ");
+            } catch (IndexOutOfBoundsException ignored) {}
         }
-        else {
-            this.testo = " no connection";
+
+        testo2 = result.replaceAll("[+*]", "");
+        if ((c==1)&&(testo2!=null)) testo2 = testo2.substring(2);
+        if (js.done)
+        {
+            search = true;
+            src = testo2;
         }
-        return this.testo;
     }
 
     protected ArrayList<String> composeBibbia() {

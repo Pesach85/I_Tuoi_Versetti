@@ -1,6 +1,8 @@
 package com.testing.ituoiversetti;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -10,6 +12,7 @@ import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author Pasquale Edmondo Lombardi under Open Source license. plombardi85@gmail.com
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         final Button button = findViewById(R.id.button);
 
         button.setOnClickListener(v -> {
-            testo = "";
+            testo = null;
             libro = ""; capitolo = 0; versetto_in = 0; versetto_final = 0;
             libro = mEdit[0].getText().toString();
             libro = ok.setTitoloCorrected(libro);
@@ -69,26 +72,14 @@ public class MainActivity extends AppCompatActivity {
             versetto_in = Integer.parseInt(mEdit[2].getText().toString());
             if (mEdit[3].getText().toString().isEmpty()) {
                 try {
-                    long startTime = System.currentTimeMillis();
-                    while (testo.equals("")||(System.currentTimeMillis()-startTime)<18000) {
-                        testo = bibbia.getWebContent(libro,capitolo,versetto_in);
-                        if (!testo.equals("")) {
-                            testo = bibbia.getWebContent(libro,capitolo,versetto_in);
-                            break; }
-                    }
+                    while (testo == null) testo = temp_string(versetto_in, versetto_in);
                 } catch (NullPointerException | IOException f) {
                     f.printStackTrace();
                 }
             } else {
                 versetto_final = Integer.parseInt(mEdit[3].getText().toString());
                 try {
-                    long startTime = System.currentTimeMillis();
-                    while (testo.equals("")||(System.currentTimeMillis()-startTime)<18000) {
-                        testo = bibbia.getWebContent(libro,capitolo,versetto_in,versetto_final);
-                        if (!testo.equals("")) {
-                            testo = bibbia.getWebContent(libro,capitolo,versetto_in,versetto_final);
-                            break; }
-                        }
+                    while (testo == null) testo = temp_string(versetto_in, versetto_final);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -112,9 +103,36 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startActivity(whatsappIntent);
             } catch (android.content.ActivityNotFoundException ex) {
                 startActivity(new Intent(Intent.ACTION_VIEW,
-                                 Uri.parse("http://play.google.com/store/apps/details?id=com.whatsapp")));
+                                 Uri.parse("https://play.google.com/store/apps/details?id=com.whatsapp")));
             }
         });
+    }
+
+    public String temp_string(Integer versetto_in, Integer versetto_final) throws IOException {
+        String temp = null;
+        long startTime = System.currentTimeMillis();
+
+        boolean connected;
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        connected = cm.getNetworkCapabilities(cm.getActiveNetwork()) != null;
+
+
+        if (connected) {
+            Bibbia bibbia2 = new Bibbia();
+            while ( bibbia2.src.equals("") && (System.currentTimeMillis() - startTime < 17000)) {
+                try {
+                    bibbia2.getWebContent(libro, capitolo, versetto_in, versetto_final);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+                if ((System.currentTimeMillis() - startTime) == 16500) { temp = "Conn timeout"; break; }
+                }
+            if (bibbia2.search) temp = bibbia2.src;
+            }
+        else temp = " no connection";
+        return temp;
     }
 
     @Override
