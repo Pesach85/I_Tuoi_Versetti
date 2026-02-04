@@ -19,6 +19,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url "https://repo.maven.apache.org" } // URL esplicito
         maven { url 'https://jitpack.io' }
         
     }
