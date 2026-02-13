@@ -1,88 +1,88 @@
 package com.testing.ituoiversetti;
 
+import android.content.Context;
+
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
+import com.tom_roush.pdfbox.io.MemoryUsageSetting;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.text.PDFTextStripper;
 
-import android.content.Context;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
 
 public class PdfParser {
 
-    /**
-     * Inizializza PDFBox per Android.
-     * IMPORTANTE: Chiama questo metodo una volta all'avvio dell'app (es. in onCreate di Application o Activity)
-     */
+    private static final String PDF_NAME = "nwt_i.pdf";
+
     public static void init(Context context) {
-        PDFBoxResourceLoader.init(context);
+        PDFBoxResourceLoader.init(context.getApplicationContext());
     }
 
-    /**
-     * Estrae tutto il testo da un file PDF usando il percorso del file.
-     *
-     * @param filePath Il percorso del file PDF.
-     * @return Il testo estratto come stringa.
-     * @throws IOException se c'è un errore nella lettura del file.
-     */
-    public static String extractTextFromPdf(String filePath) throws IOException {
-        PDDocument document = null;
-        try {
-            document = PDDocument.load(new File(filePath));
+    /** Ritorna un File leggibile da PDFBox (filesDir aggiornabile -> altrimenti asset copiato in cache). */
+    public static File getReadablePdfFile(Context ctx) throws IOException {
+        File updated = new File(ctx.getFilesDir(), PDF_NAME);
+        if (updated.exists() && updated.length() > 0) return updated;
+
+        File cached = new File(ctx.getCacheDir(), PDF_NAME);
+        if (!cached.exists() || cached.length() == 0) {
+            copyAssetTo(ctx, PDF_NAME, cached);
+        }
+        return cached;
+    }
+
+    public static String extractAllText(Context ctx) throws IOException {
+        File pdfFile = getReadablePdfFile(ctx);
+        try (PDDocument document = PDDocument.load(pdfFile, MemoryUsageSetting.setupTempFileOnly())) {
             PDFTextStripper stripper = new PDFTextStripper();
+            stripper.setSortByPosition(true);
             return stripper.getText(document);
-        } finally {
-            if (document != null) {
-                document.close();
-            }
         }
     }
 
-    /**
-     * Estrae tutto il testo da un PDF usando un InputStream (utile per assets o URI).
-     *
-     * @param inputStream L'InputStream del file PDF.
-     * @return Il testo estratto come stringa.
-     * @throws IOException se c'è un errore nella lettura.
-     */
-    public static String extractTextFromPdf(InputStream inputStream) throws IOException {
-        PDDocument document = null;
-        try {
-            document = PDDocument.load(inputStream);
-            PDFTextStripper stripper = new PDFTextStripper();
-            return stripper.getText(document);
-        } finally {
-            if (document != null) {
-                document.close();
-            }
+    /** Salva/aggiorna il PDF in filesDir in modo "atomico" (sicuro contro file incompleti). */
+    public static void replaceUpdatedPdf(Context ctx, InputStream newPdfStream) throws IOException {
+        File target = new File(ctx.getFilesDir(), PDF_NAME);
+        File tmp = new File(ctx.getCacheDir(), PDF_NAME + ".tmp");
+
+        try (OutputStream out = new FileOutputStream(tmp)) {
+            byte[] buf = new byte[8192];
+            int r;
+            while ((r = newPdfStream.read(buf)) != -1) out.write(buf, 0, r);
         }
+
+        // sanity check minimale
+        if (tmp.length() < 1024) { // evita scritture vuote/corrotte
+            //noinspection ResultOfMethodCallIgnored
+            tmp.delete();
+            throw new IOException("PDF troppo piccolo o corrotto");
+        }
+
+        // rimpiazzo best-effort
+        if (target.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            target.delete();
+        }
+        if (!tmp.renameTo(target)) {
+            // fallback copy se rename non funziona
+            try (InputStream in = new FileInputStream(tmp);
+                 OutputStream out = new FileOutputStream(target)) {
+                byte[] buf = new byte[8192];
+                int r;
+                while ((r = in.read(buf)) != -1) out.write(buf, 0, r);
+            }
+            //noinspection ResultOfMethodCallIgnored
+            tmp.delete();
+        }
+
+        // se hai cache testo/indice, invalidala qui:
+        NwtOfflineRepository.invalidate(); // se usi il repo che ti ho passato
     }
 
-    /**
-     * Analizza il testo estratto per trovare frasi associate a capitoli e versetti.
-     * Questo esempio assume un pattern come "Chapter 1, Verse 1: " o simile.
-     *
-     * @param text Il testo estratto dal PDF.
-     * @return Una mappa dove la chiave è l'identificatore del versetto (es. "1:1") e il valore è la frase.
-     */
-    public static Map<String, String> parseText(String text) {
-        Map<String, String> sentencesByVerse = new HashMap<>();
-        // Questo pattern regex deve essere adattato al formato specifico del tuo PDF.
-        // Cerca "Chapter X, Verse Y:" seguito dalla frase.
-        Pattern pattern = Pattern.compile("Chapter (\\d+), Verse (\\d+):\\s*(.*?)(?=(Chapter \\d+, Verse \\d+)|$)", Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(text);
-
-        while (matcher.find()) {
-            String chapter = matcher.group(1);
-            String verse = matcher.group(2);
-            String sentence = matcher.group(3).trim();
-            sentencesByVerse.put(chapter + ":" + verse, sentence);
+    private static void copyAssetTo(Context ctx, String assetName, File dest) throws IOException {
+        try (InputStream in = ctx.getAssets().open(assetName);
+             OutputStream out = new FileOutputStream(dest)) {
+            byte[] buf = new byte[8192];
+            int r;
+            while ((r = in.read(buf)) != -1) out.write(buf, 0, r);
         }
-        return sentencesByVerse;
     }
 }
