@@ -21,15 +21,18 @@ public class MyApp extends Application {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
-        PeriodicWorkRequest req =
-                new PeriodicWorkRequest.Builder(PdfUpdateWorker.class, 1, TimeUnit.DAYS)
-                        .setConstraints(constraints)
-                        .build();
 
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                "pdf_update_nwt",
-                ExistingPeriodicWorkPolicy.KEEP,
-                req
+        OneTimeWorkRequest indexReq =
+                new OneTimeWorkRequest.Builder(BibleIndexWorker.class).build();
+
+        WorkManager.getInstance(this).enqueueUniqueWork(
+                "bible_index",
+                ExistingWorkPolicy.KEEP,
+                new OneTimeWorkRequest.Builder(BibleIndexWorker.class).build()
         );
+
     }
 }
+
+
+

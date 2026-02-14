@@ -94,6 +94,13 @@ public class PdfUpdateWorker extends Worker {
             NwtOfflineRepository.invalidate(); // <-- allinea al tuo metodo reale
             return Result.success();
 
+            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork(
+                    "bible_index",
+                    ExistingWorkPolicy.REPLACE,
+                    new OneTimeWorkRequest.Builder(BibleIndexWorker.class).build()
+            );
+
+
         } catch (Exception e) {
             return Result.retry();
         } finally {

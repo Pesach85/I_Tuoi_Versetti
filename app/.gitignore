@@ -1,1 +1,9 @@
 /build
+*.class
+**/*.class
+/build
+**/build
+/.gradle
+**/.gradle
+/local.properties
+

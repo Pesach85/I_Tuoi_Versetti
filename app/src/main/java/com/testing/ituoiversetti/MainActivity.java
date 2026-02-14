@@ -115,31 +115,36 @@ public class MainActivity extends AppCompatActivity {
 
     // ✅ Ricerca: WEB se possibile, altrimenti fallback PDF
     private String searchVerseText(String libro, int capitolo, int versettoIn, int versettoFin) throws IOException {
-        String web = null;
-
+        // 1) DB first (offline fast)
+        BibleDb db = BibleDb.get(this);
+        long n = db.verseDao().countAll();
+        if (n == 0) {
+            return "Offline: indicizzazione in corso. Riprova tra poco.";
+        }
+    
+        List<String> keys = BookNameUtil.candidateKeys(libro);
+        List<VerseRow> rows = db.verseDao().getRange(keys, capitolo, versettoIn, versettoFin);
+    
+        if (rows != null && !rows.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (VerseRow r : rows) sb.append(r.verse).append(" ").append(r.text).append(" ");
+            return sb.toString().trim();
+        }
+    
+        // 2) Se online, fai web e (opzionale) salvi nel DB
         if (isConnected()) {
             Bibbia bibbia2 = new Bibbia();
-            long start = System.currentTimeMillis();
-
-            // tenta per max 17s circa (come facevi tu)
-            while (bibbia2.src.equals("") && (System.currentTimeMillis() - start < 17000)) {
-                try {
-                    bibbia2.getWebContent(libro, capitolo, versettoIn, versettoFin);
-                } catch (IOException e) {
-                    break;
-                }
+            bibbia2.getWebContent(libro, capitolo, versettoIn, versettoFin);
+            if (bibbia2.search && bibbia2.src != null && !bibbia2.src.trim().isEmpty()) {
+                // opzionale: qui potresti “splittare” bibbia2.src e salvarla in DB,
+                // ma per ora almeno la ritorni.
+                return bibbia2.src;
             }
-            if (bibbia2.search) web = bibbia2.src;
         }
-
-        if (web != null && !web.trim().isEmpty()) {
-            return web;
-        }
-
-        // ✅ OFFLINE PDF (usa il repository che ti ho scritto prima)
-        return NwtOfflineRepository.findVerseRange(this, libro, capitolo, versettoIn, versettoFin);
-        // oppure: return OfflineBibleRepositoryNwt.findVerseRange(...)
+    
+        return "Non trovato offline";
     }
+
 
     private boolean isConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
