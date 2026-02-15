@@ -6,6 +6,9 @@ import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -15,7 +18,7 @@ public class PdfUpdateWorker extends Worker {
 
     private static final String PDF_URL = "https://cfp2.jw-cdn.org/a/a800115/7/o/nwt_I.pdf";
 
-    private static final String PDF_NAME = "nwt_i.pdf";
+    private static final String PDF_NAME = "nwt_I.pdf";
     private static final String PREFS = "pdf_update_meta";
     private static final String KEY_ETAG = "etag";
     private static final String KEY_LAST_MOD = "last_modified";
@@ -68,8 +71,10 @@ public class PdfUpdateWorker extends Worker {
             if (tmp.length() < 1024) return Result.retry(); // sanity
 
             // promozione (best effort)
-            if (target.exists()) //noinspection ResultOfMethodCallIgnored
+            if (target.exists()) {
+                //noinspection ResultOfMethodCallIgnored
                 target.delete();
+            }
 
             if (!tmp.renameTo(target)) {
                 try (InputStream in = new FileInputStream(tmp);
@@ -86,20 +91,21 @@ public class PdfUpdateWorker extends Worker {
             String newEtag = conn.getHeaderField("ETag");
             String newLastMod = conn.getHeaderField("Last-Modified");
             sp.edit()
-              .putString(KEY_ETAG, newEtag)
-              .putString(KEY_LAST_MOD, newLastMod)
-              .apply();
+                    .putString(KEY_ETAG, newEtag)
+                    .putString(KEY_LAST_MOD, newLastMod)
+                    .apply();
 
-            // invalida cache testo/indice
-            NwtOfflineRepository.invalidate(); // <-- allinea al tuo metodo reale
-            return Result.success();
+            // invalida cache testo/indice (se usi ancora repository in memoria)
+            NwtOfflineRepository.invalidate();
 
+            // ricostruisci DB offline (worker unico)
             WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork(
                     "bible_index",
                     ExistingWorkPolicy.REPLACE,
                     new OneTimeWorkRequest.Builder(BibleIndexWorker.class).build()
             );
 
+            return Result.success();
 
         } catch (Exception e) {
             return Result.retry();

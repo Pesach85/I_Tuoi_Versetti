@@ -1,3 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="content_padding">16dp</dimen>
+    <dimen name="field_spacing">12dp</dimen>
+    <dimen name="corner_radius">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="whatsapp_btn">56dp</dimen>
 </resources>

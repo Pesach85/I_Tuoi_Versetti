@@ -1,111 +1,172 @@
 package com.testing.ituoiversetti;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.MultiAutoCompleteTextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import android.view.Menu;
+import android.view.MenuItem;
+
+
 public class MainActivity extends AppCompatActivity {
 
-    AutoCompleteTextView[] mEdit = new AutoCompleteTextView[5];
-    ArrayAdapter<String> arrayAdapter;
-    String libro = "";
-    Integer capitolo = 0;
-    Integer versetto_in = 0;
-    Integer versetto_final = 0;
-    Bibbia bibbia = new Bibbia();
-    String testo = "";
-    InputCheck ok = new InputCheck();
+    // UI
+    private AutoCompleteTextView bookView;
+    private AutoCompleteTextView chapterView;
+    private AutoCompleteTextView verseFromView;
+    private AutoCompleteTextView verseToView;
+    private MultiAutoCompleteTextView outputView;
 
-    // ✅ Thread pool per fare ricerca senza bloccare UI
+    private ArrayAdapter<String> arrayAdapter;
+
+    // Logic
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final InputCheck ok = new InputCheck();
+
+    // Stato UI: evita che il progresso sovrascriva un risultato “finale”
+    private volatile boolean userSearchInProgress = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        com.google.android.material.appbar.MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        // Se non l’hai già fatto altrove (meglio in Application.onCreate):
-        // PdfParser.init(getApplicationContext());
 
-        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, bibbia.composeBibbia());
+        bookView      = findViewById(R.id.autoCompleteTextView);
+        chapterView   = findViewById(R.id.autoCompleteTextView2);
+        verseFromView = findViewById(R.id.autoCompleteTextView3);
+        verseToView   = findViewById(R.id.autoCompleteTextView4);
+        outputView    = findViewById(R.id.multiAutoCompleteTextView);
 
-        mEdit[0] = findViewById(R.id.autoCompleteTextView);   // Libro
-        mEdit[1] = findViewById(R.id.autoCompleteTextView2);  // Capitolo
-        mEdit[2] = findViewById(R.id.autoCompleteTextView3);  // Versetto IN
-        mEdit[3] = findViewById(R.id.autoCompleteTextView4);  // Versetto FIN (opz.)
-        mEdit[4] = findViewById(R.id.multiAutoCompleteTextView); // Output
+        // Lista libri: puoi usare Bibbia.composeBibbia() senza istanziare Bibbia come campo
+        arrayAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line,
+                new Bibbia().composeBibbia());
+        bookView.setAdapter(arrayAdapter);
 
-        mEdit[0].setAdapter(arrayAdapter);
+        Button searchBtn = findViewById(R.id.button);
+        ImageButton whatsappBtn = findViewById(R.id.imageButton);
 
-        final Button button = findViewById(R.id.button);
+        // Se DB è vuoto, fai partire subito l’indicizzazione (senza aspettare il click)
+        executor.execute(() -> {
+            long c = BibleDb.get(getApplicationContext()).verseDao().countAll();
+            if (c == 0) {
+                ensureIndexWorkEnqueued();
+                runOnUiThread(() -> outputView.setText("Offline: indicizzazione in corso..."));
+            }
+        });
 
-        button.setOnClickListener(v -> {
-            // 1) Leggi input e valida (NO crash)
-            String libroIn = safeText(mEdit[0]);
-            libroIn = ok.setTitoloCorrected(libroIn);
+        // Observer progresso indicizzazione DB
+        WorkManager.getInstance(this)
+                .getWorkInfosForUniqueWorkLiveData("bible_index")
+                .observe(this, infos -> {
+                    if (infos == null || infos.isEmpty()) return;
+                    WorkInfo wi = infos.get(0);
 
-            Integer cap = parseIntOrNull(mEdit[1]);
-            Integer vIn = parseIntOrNull(mEdit[2]);
-            Integer vFin = parseIntOrNull(mEdit[3]); // può essere null
+                    if (wi.getState() == WorkInfo.State.RUNNING) {
+                        int pct = wi.getProgress().getInt("pct", 0);
 
-            if (libroIn.isEmpty()) { toast("Inserisci il libro"); return; }
-            if (cap == null)       { toast("Inserisci il capitolo"); return; }
-            if (vIn == null)       { toast("Inserisci almeno un versetto"); return; }
+                        // NON sovrascrivere mentre l’utente sta cercando o dopo un risultato finale
+                        if (!userSearchInProgress) {
+                            String current = safeText(outputView);
+                            if (current.isEmpty() ||
+                                current.startsWith("Offline: indicizzazione") ||
+                                current.startsWith("Indicizzazione")) {
+                                outputView.setText("Offline: indicizzazione in corso... " + pct + "%");
+                            }
+                        }
+                    }
 
-            // 2) Imposta stato UI (facoltativo ma utile)
-            button.setEnabled(false);
-            mEdit[4].setText("Ricerca in corso...");
+                    // Quando finisce, se la vista mostra ancora “indicizzazione”, aggiorna messaggio
+                    if (wi.getState() == WorkInfo.State.SUCCEEDED && !userSearchInProgress) {
+                        String current = safeText(outputView);
+                        if (current.startsWith("Offline: indicizzazione") || current.startsWith("Indicizzazione")) {
+                            outputView.setText("Offline: pronto ✅");
+                        }
+                    }
+                });
 
-            // 3) Esegui ricerca in background
-            final String finalLibro = libroIn;
-            final int finalCap = cap;
-            final int finalVIn = vIn;
-            final Integer finalVFin = vFin;
+        searchBtn.setOnClickListener(v -> {
+            // Validazione input
+            String libro = safeText(bookView);
+            libro = ok.setTitoloCorrected(libro);
+
+            Integer cap = parseIntOrNull(chapterView);
+            Integer vIn = parseIntOrNull(verseFromView);
+            Integer vFin = parseIntOrNull(verseToView);
+
+            if (libro.isEmpty()) { toast("Inserisci il libro"); return; }
+            if (cap == null)     { toast("Inserisci il capitolo"); return; }
+            if (vIn == null)     { toast("Inserisci almeno un versetto"); return; }
+
+            int capitolo;
+            try {
+                capitolo = ok.setCapitoloCorrected(cap);
+            } catch (IOException e) {
+                toast("Capitolo non valido");
+                return;
+            }
+
+            int versettoIn = vIn;
+            int versettoFin = (vFin == null) ? vIn : vFin;
+            if (versettoFin < versettoIn) versettoFin = versettoIn;
+
+            // Opzionale: auto suggerimenti capitoli (non blocca più la UI)
+            try { new NumCapitoli().selectCapN(libro); } catch (IOException ignored) {}
+
+            // UI state
+            userSearchInProgress = true;
+            searchBtn.setEnabled(false);
+            outputView.setText("Ricerca in corso...");
+
+            final String fLibro = libro;
+            final int fCap = capitolo;
+            final int fVIn = versettoIn;
+            final int fVFin = versettoFin;
 
             executor.execute(() -> {
                 String result;
                 try {
-                    int capCorr = ok.setCapitoloCorrected(finalCap);
-                    int vFinCorr = (finalVFin == null) ? finalVIn : finalVFin;
-
-                    // ✅ qui chiamiamo un metodo che fa WEB e se fallisce fa OFFLINE PDF
-                    result = searchVerseText(finalLibro, capCorr, finalVIn, vFinCorr);
-
-                    final String show = finalLibro + " " + capCorr + ": " + result;
-
-                    runOnUiThread(() -> {
-                        mEdit[4].setText(show);
-                        button.setEnabled(true);
-                    });
-
+                    result = searchDbOnly(fLibro, fCap, fVIn, fVFin);
                 } catch (Exception e) {
-                    runOnUiThread(() -> {
-                        mEdit[4].setText("Errore ricerca");
-                        button.setEnabled(true);
-                    });
+                    result = "Errore ricerca";
                 }
+
+                final String show = fLibro + " " + fCap + ": " + result;
+                runOnUiThread(() -> {
+                    outputView.setText(show);
+                    searchBtn.setEnabled(true);
+                    userSearchInProgress = false;
+                });
             });
         });
 
-        final ImageButton button1 = findViewById(R.id.imageButton);
-        button1.setOnClickListener(v -> {
+        whatsappBtn.setOnClickListener(v -> {
             Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
             whatsappIntent.setType("text/plain");
             whatsappIntent.setPackage("com.whatsapp");
-            whatsappIntent.putExtra(Intent.EXTRA_TEXT, mEdit[4].getText().toString());
+            whatsappIntent.putExtra(Intent.EXTRA_TEXT, safeText(outputView));
             try {
-                MainActivity.this.startActivity(whatsappIntent);
+                startActivity(whatsappIntent);
             } catch (android.content.ActivityNotFoundException ex) {
                 startActivity(new Intent(Intent.ACTION_VIEW,
                         Uri.parse("https://play.google.com/store/apps/details?id=com.whatsapp")));
@@ -113,46 +174,36 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // ✅ Ricerca: WEB se possibile, altrimenti fallback PDF
-    private String searchVerseText(String libro, int capitolo, int versettoIn, int versettoFin) throws IOException {
-        // 1) DB first (offline fast)
-        BibleDb db = BibleDb.get(this);
-        long n = db.verseDao().countAll();
-        if (n == 0) {
+    /** DB-only */
+    private String searchDbOnly(String libro, int capitolo, int vIn, int vFin) {
+        BibleDb db = BibleDb.get(getApplicationContext());
+
+        long count = db.verseDao().countAll();
+        if (count == 0) {
+            ensureIndexWorkEnqueued();
             return "Offline: indicizzazione in corso. Riprova tra poco.";
         }
-    
+
         List<String> keys = BookNameUtil.candidateKeys(libro);
-        List<VerseRow> rows = db.verseDao().getRange(keys, capitolo, versettoIn, versettoFin);
-    
-        if (rows != null && !rows.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (VerseRow r : rows) sb.append(r.verse).append(" ").append(r.text).append(" ");
-            return sb.toString().trim();
+        List<VerseRow> rows = db.verseDao().getRange(keys, capitolo, vIn, vFin);
+
+        if (rows == null || rows.isEmpty()) {
+            return "Non trovato nel DB";
         }
-    
-        // 2) Se online, fai web e (opzionale) salvi nel DB
-        if (isConnected()) {
-            Bibbia bibbia2 = new Bibbia();
-            bibbia2.getWebContent(libro, capitolo, versettoIn, versettoFin);
-            if (bibbia2.search && bibbia2.src != null && !bibbia2.src.trim().isEmpty()) {
-                // opzionale: qui potresti “splittare” bibbia2.src e salvarla in DB,
-                // ma per ora almeno la ritorni.
-                return bibbia2.src;
-            }
+
+        StringBuilder sb = new StringBuilder();
+        for (VerseRow r : rows) {
+            sb.append(r.verse).append(" ").append(r.text).append(" ");
         }
-    
-        return "Non trovato offline";
+        return sb.toString().trim();
     }
 
-
-    private boolean isConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm == null) return false;
-        android.net.Network n = cm.getActiveNetwork();
-        if (n == null) return false;
-        NetworkCapabilities caps = cm.getNetworkCapabilities(n);
-        return caps != null;
+    private void ensureIndexWorkEnqueued() {
+        WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork(
+                "bible_index",
+                ExistingWorkPolicy.KEEP,
+                new OneTimeWorkRequest.Builder(BibleIndexWorker.class).build()
+        );
     }
 
     private static String safeText(AutoCompleteTextView v) {
@@ -185,7 +236,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_settings) return true;
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Toast.makeText(this, "Impostazioni (TODO)", Toast.LENGTH_SHORT).show();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
+
 }

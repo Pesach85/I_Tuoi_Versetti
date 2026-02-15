@@ -1,18 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="Impostazioni" translatable="false">Settings</string>
-    <string name="Avvertenze" translatable="false">Note: questa applicazione viene distribuita e rilasciata per solo scopo informativo e
+    <string name="app_name">I Tuoi Versetti</string>
+
+    <string name="ricerca_biblica_per_versetti">Ricerca Biblica per versetti</string>
+    <string name="libro_biblico">Libro biblico</string>
+    <string name="inserisci_il_capitolo">Inserisci il capitolo</string>
+    <string name="versetto_iniziale">Versetto iniziale</string>
+    <string name="versetto_finale_facoltativo">Versetto finale (facoltativo)</string>
+    <string name="cerca">CERCA</string>
+    <string name="risultato_della_ricerca">Risultato della ricerca</string>
+    <string name="avvertenze">Avvertenze</string>
+    <string name="todo">Azione</string>
+    <string name="impostazioni">Impostazioni</string>
+
+    <string name="note_legali">
+        Note: questa applicazione viene distribuita e rilasciata per solo scopo informativo e
         istruttivo. L\'autore non si assume responsabilità alcuna di utilizzi non leciti e contro principi etici
         universalmente condivisi. Viene rilasciata gratuitamente con lo scopo di facilitare il reperimento di
         informazioni bibliche dalla Traduzione del Nuovo Mondo, edita dalla Watch Tower e la Tract Society. In nessun
         caso dichiaro di agire a nome di altre persone fisiche o giuridiche al di fuori di Pasquale Edmondo Lombardi, in
         armonia con i suoi propositi sotto ogni normativa internazionale inerente la protezione di dati e dispositivi.
     </string>
-    <string name="ricerca_biblica_per_versetti">Ricerca Biblica per versetti</string>
-    <string name="libro_biblico">Libro biblico</string>
-    <string name="versetto_finale_facoltativo">Versetto finale ( facoltativo)</string>
-    <string name="inserisci_il_capitolo">Inserisci il capitolo</string>
-    <string name="todo">TODO</string>
-    <string name="versetto_iniziale">Versetto iniziale</string>
-    <string name="cerca">CERCA</string>
-    <string name="risultato_della_ricerca">Risultato della ricerca</string>
 </resources>

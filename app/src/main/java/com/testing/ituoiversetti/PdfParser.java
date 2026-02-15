@@ -11,7 +11,7 @@ import java.io.*;
 
 public class PdfParser {
 
-    private static final String PDF_NAME = "nwt_i.pdf";
+    private static final String PDF_NAME = "nwt_I.pdf";
 
     public static void init(Context context) {
         PDFBoxResourceLoader.init(context.getApplicationContext());

@@ -1,2 +1,12 @@
+
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+
+rootProject.name = "I_Tuoi_Versetti"
 include ':app'
-rootProject.name='I_Tuoi_Versetti'
