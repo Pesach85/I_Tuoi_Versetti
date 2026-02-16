@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/sw_debug"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Abilita logging debug" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/sw_verbose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Verbose (logga anche frasi/pezzi di testo)" />
+
+        <TextView
+            android:id="@+id/txt_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="12dp"
+            android:textSize="13sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_show_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Mostra log" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_clear_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Pulisci log" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

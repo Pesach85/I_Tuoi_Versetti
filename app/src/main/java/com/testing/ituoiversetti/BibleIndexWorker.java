@@ -21,8 +21,9 @@ public class BibleIndexWorker extends Worker {
 
     // Header: "Libro" + "cap:inizio-fine"
     private static final Pattern HEADER = Pattern.compile(
-            "(?m)^\\s*(\\S.*\\S)\\s*\\R\\s*(\\d+):(\\d+)-(\\d+)\\s*$"
+        "(?m)^\\s*(\\S.*\\S)\\s*(?:\\R|\\s+)\\s*(\\d+):(\\d+)[\\-–—](\\d+)\\s*$"
     );
+
 
     // Marker versetto: start riga o punteggiatura forte prima del numero
     private static final Pattern VERSE_MARK = Pattern.compile(
@@ -36,6 +37,7 @@ public class BibleIndexWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        setProgressAsync(new Data.Builder().putInt("pct", 1).putString("stage","Apro PDF").build());
         try {
             Context ctx = getApplicationContext();
 
@@ -51,8 +53,10 @@ public class BibleIndexWorker extends Worker {
             }
 
             // estrai testo (pesante ma una tantum)
+            setProgressAsync(new Data.Builder().putInt("pct", 5).putString("stage","Estraggo testo PDF (può essere lento)").build());
             String text = PdfParser.extractAllText(ctx);
             text = normalize(text);
+            setProgressAsync(new Data.Builder().putInt("pct", 15).putString("stage","Cerco intestazioni (Libro + cap:da-a)").build());
 
             // trova headers
             List<Hdr> headers = new ArrayList<>();
@@ -62,7 +66,12 @@ public class BibleIndexWorker extends Worker {
                 int chap = Integer.parseInt(hm.group(2));
                 headers.add(new Hdr(bookRaw, chap, hm.end(), hm.start()));
             }
-            if (headers.isEmpty()) return Result.retry();
+            if (headers.isEmpty()) {
+            Data out = new Data.Builder()
+                    .putString("err", "HEADER non trovato nel testo estratto dal PDF (regex/estrazione).")
+                    .build();
+            return Result.failure(out);
+}
 
             // end = start del prossimo header
             for (int i = 0; i < headers.size(); i++) {

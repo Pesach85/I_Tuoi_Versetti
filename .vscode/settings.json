@@ -1,8 +1,8 @@
 {
     "java.configuration.runtimes": [
         {
-            "name": "JavaSE-11",
-            "path": "D:\\JDK_11",
+            "name": "JavaSE-17",
+            "path": "D:\\JDK_17",
             "default": true
         }
     ],

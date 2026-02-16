@@ -47,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        com.google.android.material.appbar.MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        com.google.android.material.appbar.MaterialToolbar tb = findViewById(R.id.toolbar);
+        if (tb != null) setSupportActionBar(tb);
 
 
         bookView      = findViewById(R.id.autoCompleteTextView);
@@ -77,87 +77,81 @@ public class MainActivity extends AppCompatActivity {
 
         // Observer progresso indicizzazione DB
         WorkManager.getInstance(this)
-                .getWorkInfosForUniqueWorkLiveData("bible_index")
-                .observe(this, infos -> {
-                    if (infos == null || infos.isEmpty()) return;
-                    WorkInfo wi = infos.get(0);
+          .getWorkInfosForUniqueWorkLiveData("bible_index")
+          .observe(this, infos -> {
+              if (infos == null || infos.isEmpty()) return;
+              WorkInfo wi = infos.get(0);
+        
+              String stage = wi.getProgress().getString("stage");
+              int pct = wi.getProgress().getInt("pct", 0);
+        
+              if (wi.getState() == WorkInfo.State.ENQUEUED) {
+                  outputView.setText("Offline: indicizzazione in coda...");
+              } else if (wi.getState() == WorkInfo.State.RUNNING) {
+                  outputView.setText("Offline: indicizzazione... " + pct + "%\n" + (stage != null ? stage : ""));
+              } else if (wi.getState() == WorkInfo.State.FAILED) {
+                  String err = wi.getOutputData().getString("err");
+                  outputView.setText("Offline: indicizzazione FALLITA ❌\n" + (err != null ? err : "Errore sconosciuto"));
+              } else if (wi.getState() == WorkInfo.State.SUCCEEDED) {
+                  outputView.setText("Offline: pronto ✅");
+              }
+          });
 
-                    if (wi.getState() == WorkInfo.State.RUNNING) {
-                        int pct = wi.getProgress().getInt("pct", 0);
-
-                        // NON sovrascrivere mentre l’utente sta cercando o dopo un risultato finale
-                        if (!userSearchInProgress) {
-                            String current = safeText(outputView);
-                            if (current.isEmpty() ||
-                                current.startsWith("Offline: indicizzazione") ||
-                                current.startsWith("Indicizzazione")) {
-                                outputView.setText("Offline: indicizzazione in corso... " + pct + "%");
-                            }
-                        }
-                    }
-
-                    // Quando finisce, se la vista mostra ancora “indicizzazione”, aggiorna messaggio
-                    if (wi.getState() == WorkInfo.State.SUCCEEDED && !userSearchInProgress) {
-                        String current = safeText(outputView);
-                        if (current.startsWith("Offline: indicizzazione") || current.startsWith("Indicizzazione")) {
-                            outputView.setText("Offline: pronto ✅");
-                        }
-                    }
-                });
 
         searchBtn.setOnClickListener(v -> {
-            // Validazione input
-            String libro = safeText(bookView);
-            libro = ok.setTitoloCorrected(libro);
-
+        
+            // 1) leggi input
+            String libroInput = safeText(bookView);
             Integer cap = parseIntOrNull(chapterView);
             Integer vIn = parseIntOrNull(verseFromView);
             Integer vFin = parseIntOrNull(verseToView);
-
-            if (libro.isEmpty()) { toast("Inserisci il libro"); return; }
-            if (cap == null)     { toast("Inserisci il capitolo"); return; }
-            if (vIn == null)     { toast("Inserisci almeno un versetto"); return; }
-
+        
+            // 2) valida PRIMA di qualsiasi correzione
+            if (libroInput.isEmpty()) {
+                toast("Inserisci il libro");
+                bookView.requestFocus();
+                return;
+            }
+            if (cap == null) {
+                toast("Inserisci il capitolo");
+                chapterView.requestFocus();
+                return;
+            }
+            if (vIn == null) {
+                toast("Inserisci almeno un versetto");
+                verseFromView.requestFocus();
+                return;
+            }
+        
+            // 3) ora puoi correggere il titolo in sicurezza
+            String libro;
+            try {
+                libro = ok.setTitoloCorrected(libroInput);
+                if (libro == null || libro.trim().isEmpty()) {
+                    toast("Libro non valido");
+                    bookView.requestFocus();
+                    return;
+                }
+            } catch (Exception e) {
+                toast("Libro non valido");
+                bookView.requestFocus();
+                return;
+            }
+        
             int capitolo;
             try {
                 capitolo = ok.setCapitoloCorrected(cap);
             } catch (IOException e) {
                 toast("Capitolo non valido");
+                chapterView.requestFocus();
                 return;
             }
-
+        
             int versettoIn = vIn;
             int versettoFin = (vFin == null) ? vIn : vFin;
             if (versettoFin < versettoIn) versettoFin = versettoIn;
-
-            // Opzionale: auto suggerimenti capitoli (non blocca più la UI)
-            try { new NumCapitoli().selectCapN(libro); } catch (IOException ignored) {}
-
-            // UI state
-            userSearchInProgress = true;
-            searchBtn.setEnabled(false);
-            outputView.setText("Ricerca in corso...");
-
-            final String fLibro = libro;
-            final int fCap = capitolo;
-            final int fVIn = versettoIn;
-            final int fVFin = versettoFin;
-
-            executor.execute(() -> {
-                String result;
-                try {
-                    result = searchDbOnly(fLibro, fCap, fVIn, fVFin);
-                } catch (Exception e) {
-                    result = "Errore ricerca";
-                }
-
-                final String show = fLibro + " " + fCap + ": " + result;
-                runOnUiThread(() -> {
-                    outputView.setText(show);
-                    searchBtn.setEnabled(true);
-                    userSearchInProgress = false;
-                });
-            });
+        
+            // (il resto del tuo codice: userSearchInProgress=true, disable button, executor, ecc.)
         });
 
         whatsappBtn.setOnClickListener(v -> {
@@ -236,9 +230,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Toast.makeText(this, "Impostazioni (TODO)", Toast.LENGTH_SHORT).show();
+        if (item.getItemId() == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
