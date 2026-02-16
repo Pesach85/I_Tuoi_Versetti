@@ -11,8 +11,8 @@ import java.util.List;
 public interface VerseDao {
 
     @Query("SELECT verse, text FROM verses " +
-           "WHERE bookKey IN (:bookKeys) AND chapter=:chapter AND verse BETWEEN :fromV AND :toV " +
-           "ORDER BY verse")
+            "WHERE bookKey IN (:bookKeys) AND chapter=:chapter AND verse BETWEEN :fromV AND :toV " +
+            "ORDER BY verse")
     List<VerseRow> getRange(List<String> bookKeys, int chapter, int fromV, int toV);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -23,6 +23,14 @@ public interface VerseDao {
 
     @Query("DELETE FROM verses")
     void clearAll();
+
+    // ---- TOOL: ispezione DB ----
+    @Query("SELECT bookKey AS bookKey, COUNT(*) AS cnt FROM verses GROUP BY bookKey ORDER BY bookKey")
+    List<BookCount> listBooks();
+
+    @Query("SELECT bookKey AS bookKey, chapter AS chapter, verse AS verse, substr(text,1,120) AS text " +
+           "FROM verses ORDER BY bookKey, chapter, verse LIMIT :limit")
+    List<VerseDump> dump(int limit);
 }
 
 

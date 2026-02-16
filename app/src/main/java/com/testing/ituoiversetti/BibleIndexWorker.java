@@ -2,6 +2,7 @@ package com.testing.ituoiversetti;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -16,14 +17,15 @@ import java.util.regex.Pattern;
 
 public class BibleIndexWorker extends Worker {
 
+    private static final String TAG = "BibleIndexWorker";
+
     private static final String PREFS = "bible_index";
     private static final String KEY_FP = "pdf_fp";
 
     // Header: "Libro" + "cap:inizio-fine"
     private static final Pattern HEADER = Pattern.compile(
-        "(?m)^\\s*(\\S.*\\S)\\s*(?:\\R|\\s+)\\s*(\\d+):(\\d+)[\\-–—](\\d+)\\s*$"
+            "(?m)^\\s*(\\S.*\\S)\\s*(?:\\R|\\s+)\\s*(\\d+):(\\d+)[\\-–—](\\d+)\\s*$"
     );
-
 
     // Marker versetto: start riga o punteggiatura forte prima del numero
     private static final Pattern VERSE_MARK = Pattern.compile(
@@ -37,41 +39,70 @@ public class BibleIndexWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        setProgressAsync(new Data.Builder().putInt("pct", 1).putString("stage","Apro PDF").build());
-        try {
-            Context ctx = getApplicationContext();
+        Context ctx = getApplicationContext();
 
+        // progress + log start
+        setProgressAsync(new Data.Builder().putInt("pct", 1).putString("stage", "Apro PDF").build());
+        Log.i(TAG, "start. ctx=" + ctx);
+
+        File pdf = null;
+        HttpFail lastFail = null;
+
+        try {
             // fingerprint per non reindicizzare inutilmente
-            File pdf = PdfParser.getReadablePdfFile(ctx);
+            pdf = PdfParser.getReadablePdfFile(ctx);
             String fp = pdf.length() + ":" + pdf.lastModified();
 
             SharedPreferences sp = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             String done = sp.getString(KEY_FP, "");
+
+            Log.i(TAG, "pdf=" + pdf.getAbsolutePath() + " size=" + pdf.length() + " lastMod=" + pdf.lastModified());
+            Log.i(TAG, "fp=" + fp + " done=" + done);
+
             if (fp.equals(done)) {
-                setProgressAsync(new Data.Builder().putInt("pct", 100).build());
+                Log.i(TAG, "skip: fingerprint unchanged");
+                setProgressAsync(new Data.Builder().putInt("pct", 100).putString("stage", "Già indicizzato").build());
                 return Result.success();
             }
 
             // estrai testo (pesante ma una tantum)
-            setProgressAsync(new Data.Builder().putInt("pct", 5).putString("stage","Estraggo testo PDF (può essere lento)").build());
+            setProgressAsync(new Data.Builder().putInt("pct", 5).putString("stage", "Estraggo testo PDF (può essere lento)").build());
+            long t0 = System.currentTimeMillis();
             String text = PdfParser.extractAllText(ctx);
+            long t1 = System.currentTimeMillis();
+            if (text == null) text = "";
+            Log.i(TAG, "extractAllText: chars=" + text.length() + " ms=" + (t1 - t0));
+
             text = normalize(text);
-            setProgressAsync(new Data.Builder().putInt("pct", 15).putString("stage","Cerco intestazioni (Libro + cap:da-a)").build());
 
             // trova headers
+            setProgressAsync(new Data.Builder().putInt("pct", 15).putString("stage", "Cerco intestazioni (Libro + cap:da-a)").build());
             List<Hdr> headers = new ArrayList<>();
             Matcher hm = HEADER.matcher(text);
+
+            int headerSamples = 0;
             while (hm.find()) {
                 String bookRaw = hm.group(1).trim();
                 int chap = Integer.parseInt(hm.group(2));
                 headers.add(new Hdr(bookRaw, chap, hm.end(), hm.start()));
+
+                // logga solo i primi 10 header come sample
+                if (headerSamples < 10) {
+                    Log.i(TAG, "HDR sample: '" + bookRaw + "' chap=" + chap + " pos=" + hm.start() + "-" + hm.end());
+                    headerSamples++;
+                }
             }
+            Log.i(TAG, "headers found=" + headers.size());
+
             if (headers.isEmpty()) {
-            Data out = new Data.Builder()
-                    .putString("err", "HEADER non trovato nel testo estratto dal PDF (regex/estrazione).")
-                    .build();
-            return Result.failure(out);
-}
+                String snippet = text.length() > 500 ? text.substring(0, 500) : text;
+                Log.e(TAG, "HEADER not found. text head snippet:\n" + snippet);
+
+                Data out = new Data.Builder()
+                        .putString("err", "HEADER non trovato nel testo estratto dal PDF (regex/estrazione).")
+                        .build();
+                return Result.failure(out);
+            }
 
             // end = start del prossimo header
             for (int i = 0; i < headers.size(); i++) {
@@ -79,42 +110,67 @@ public class BibleIndexWorker extends Worker {
                 headers.get(i).end = end;
             }
 
+            // DB
+            setProgressAsync(new Data.Builder().putInt("pct", 20).putString("stage", "Creo DB (clear + insert)").build());
             BibleDb db = BibleDb.get(ctx);
             VerseDao dao = db.verseDao();
 
             // rebuild completo
             dao.clearAll();
+            Log.i(TAG, "db cleared");
 
             List<VerseEntity> batch = new ArrayList<>(600);
+            long inserted = 0;
 
             for (int i = 0; i < headers.size(); i++) {
                 Hdr h = headers.get(i);
 
-                int pct = (int) (((i + 1) * 100L) / headers.size());
-                setProgressAsync(new Data.Builder().putInt("pct", pct).build());
+                int pct = 20 + (int) (((i + 1) * 75L) / headers.size()); // 20..95
+                setProgressAsync(new Data.Builder().putInt("pct", pct).putString("stage", "Indicizzo: " + (i + 1) + "/" + headers.size()).build());
 
                 String bookKey = BookNameUtil.key(h.bookRaw);
-                String chunk = text.substring(h.contentStart, h.end);
+                if (bookKey.isEmpty()) {
+                    // salta header “strano”
+                    continue;
+                }
 
+                String chunk = text.substring(h.contentStart, h.end);
+                int before = batch.size();
                 parseChapterInto(batch, bookKey, h.chapter, chunk);
+                int added = batch.size() - before;
+
+                // log: ogni 200 header o se added=0
+                if ((i % 200) == 0 || added == 0) {
+                    Log.i(TAG, "hdr#" + (i + 1) + " bookKey=" + bookKey + " chap=" + h.chapter + " added=" + added);
+                }
 
                 if (batch.size() >= 600) {
                     dao.upsertAll(batch);
+                    inserted += batch.size();
                     batch.clear();
                 }
             }
 
             if (!batch.isEmpty()) {
                 dao.upsertAll(batch);
+                inserted += batch.size();
                 batch.clear();
             }
 
+            long total = dao.countAll();
+            Log.i(TAG, "inserted(approx)=" + inserted + " total(countAll)=" + total);
+
+            // salva fingerprint
             sp.edit().putString(KEY_FP, fp).apply();
-            NwtOfflineRepository.invalidate(); // se la usi ancora
-            setProgressAsync(new Data.Builder().putInt("pct", 100).build());
+
+            // invalida cache testo/indice se la usi ancora
+            NwtOfflineRepository.invalidate();
+
+            setProgressAsync(new Data.Builder().putInt("pct", 100).putString("stage", "Pronto").build());
             return Result.success();
 
         } catch (Exception e) {
+            Log.e(TAG, "worker error", e);
             return Result.retry();
         }
     }
@@ -190,10 +246,17 @@ public class BibleIndexWorker extends Worker {
         final int v;
         final int numStart;
         final int afterNum;
+
         Mark(int v, int numStart, int afterNum) {
             this.v = v;
             this.numStart = numStart;
             this.afterNum = afterNum;
         }
+    }
+
+    // solo per future estensioni (se vuoi distinguere failure “logiche”)
+    private static final class HttpFail {
+        final String msg;
+        HttpFail(String msg) { this.msg = msg; }
     }
 }

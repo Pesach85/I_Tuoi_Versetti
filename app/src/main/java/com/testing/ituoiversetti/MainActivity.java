@@ -101,17 +101,13 @@ public class MainActivity extends AppCompatActivity {
         searchBtn.setOnClickListener(v -> {
         
             // 1) leggi input
-            String libroInput = safeText(bookView);
+            String rawLibro = safeText(bookView);
             Integer cap = parseIntOrNull(chapterView);
             Integer vIn = parseIntOrNull(verseFromView);
             Integer vFin = parseIntOrNull(verseToView);
         
             // 2) valida PRIMA di qualsiasi correzione
-            if (libroInput.isEmpty()) {
-                toast("Inserisci il libro");
-                bookView.requestFocus();
-                return;
-            }
+            if (rawLibro.isEmpty()) { toast("Inserisci il libro"); bookView.requestFocus(); return; }
             if (cap == null) {
                 toast("Inserisci il capitolo");
                 chapterView.requestFocus();
@@ -124,9 +120,8 @@ public class MainActivity extends AppCompatActivity {
             }
         
             // 3) ora puoi correggere il titolo in sicurezza
-            String libro;
+            String libro = ok.setTitoloCorrected(rawLibro);
             try {
-                libro = ok.setTitoloCorrected(libroInput);
                 if (libro == null || libro.trim().isEmpty()) {
                     toast("Libro non valido");
                     bookView.requestFocus();
@@ -231,10 +226,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
+            startActivity(new Intent(this, DbInspectorActivity.class)); // per ora apriamo direttamente il tool
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
 
 }
