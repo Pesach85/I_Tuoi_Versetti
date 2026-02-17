@@ -1,11 +1,12 @@
 {
-    "java.configuration.runtimes": [
-        {
-            "name": "JavaSE-17",
-            "path": "D:\\JDK_17",
-            "default": true
-        }
-    ],
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.format.settings.url": ".vscode/java-formatter.xml"
+  "java.configuration.runtimes": [
+    { "name": "JavaSE-17", "path": "D:\\JDK_17", "default": true }
+  ],
+
+  "java.jdt.ls.java.home": "D:\\JDK_17",
+  "java.import.gradle.java.home": "D:\\JDK_17",
+  "gradle.javaHome": "D:\\JDK_17",
+
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.format.settings.url": ".vscode/java-formatter.xml"
 }

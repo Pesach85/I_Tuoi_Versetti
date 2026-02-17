@@ -101,13 +101,17 @@ public class MainActivity extends AppCompatActivity {
         searchBtn.setOnClickListener(v -> {
         
             // 1) leggi input
-            String rawLibro = safeText(bookView);
+            String libroInput = safeText(bookView);
             Integer cap = parseIntOrNull(chapterView);
             Integer vIn = parseIntOrNull(verseFromView);
             Integer vFin = parseIntOrNull(verseToView);
         
             // 2) valida PRIMA di qualsiasi correzione
-            if (rawLibro.isEmpty()) { toast("Inserisci il libro"); bookView.requestFocus(); return; }
+            if (libroInput.isEmpty()) {
+                toast("Inserisci il libro");
+                bookView.requestFocus();
+                return;
+            }
             if (cap == null) {
                 toast("Inserisci il capitolo");
                 chapterView.requestFocus();
@@ -120,8 +124,9 @@ public class MainActivity extends AppCompatActivity {
             }
         
             // 3) ora puoi correggere il titolo in sicurezza
-            String libro = ok.setTitoloCorrected(rawLibro);
+            String libro;
             try {
+                libro = ok.setTitoloCorrected(libroInput);
                 if (libro == null || libro.trim().isEmpty()) {
                     toast("Libro non valido");
                     bookView.requestFocus();
@@ -146,7 +151,35 @@ public class MainActivity extends AppCompatActivity {
             int versettoFin = (vFin == null) ? vIn : vFin;
             if (versettoFin < versettoIn) versettoFin = versettoIn;
         
-            // (il resto del tuo codice: userSearchInProgress=true, disable button, executor, ecc.)
+            
+            // Opzionale: auto suggerimenti capitoli (non blocca più la UI)
+            try { new NumCapitoli().selectCapN(libro); } catch (IOException ignored) {}
+
+            // UI state
+            userSearchInProgress = true;
+            searchBtn.setEnabled(false);
+            outputView.setText("Ricerca in corso...");
+
+            final String fLibro = libro;
+            final int fCap = capitolo;
+            final int fVIn = versettoIn;
+            final int fVFin = versettoFin;
+
+            executor.execute(() -> {
+                String result;
+                try {
+                    result = searchDbOnly(fLibro, fCap, fVIn, fVFin);
+                } catch (Exception e) {
+                    result = "Errore ricerca";
+                }
+
+                final String show = fLibro + " " + fCap + ": " + result;
+                runOnUiThread(() -> {
+                    outputView.setText(show);
+                    searchBtn.setEnabled(true);
+                    userSearchInProgress = false;
+                });
+            });
         });
 
         whatsappBtn.setOnClickListener(v -> {
