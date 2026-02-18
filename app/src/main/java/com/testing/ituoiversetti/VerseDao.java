@@ -31,6 +31,7 @@ public interface VerseDao {
     @Query("SELECT bookKey AS bookKey, chapter AS chapter, verse AS verse, substr(text,1,120) AS text " +
            "FROM verses ORDER BY bookKey, chapter, verse LIMIT :limit")
     List<VerseDump> dump(int limit);
+
 }
 
 

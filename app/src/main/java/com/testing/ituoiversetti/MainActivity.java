@@ -1,6 +1,7 @@
 package com.testing.ituoiversetti;
 
 import android.content.Intent;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
@@ -9,6 +10,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.ExistingWorkPolicy;
@@ -43,12 +45,29 @@ public class MainActivity extends AppCompatActivity {
     // Stato UI: evita che il progresso sovrascriva un risultato “finale”
     private volatile boolean userSearchInProgress = false;
 
+    private boolean isConnected() {
+        android.net.ConnectivityManager cm =
+                (android.net.ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
+    
+        android.net.Network n = cm.getActiveNetwork();
+        if (n == null) return false;
+    
+        android.net.NetworkCapabilities caps = cm.getNetworkCapabilities(n);
+        return caps != null
+                && caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET);
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        com.google.android.material.appbar.MaterialToolbar tb = findViewById(R.id.toolbar);
+        Toolbar tb = findViewById(R.id.toolbar);
         if (tb != null) setSupportActionBar(tb);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("I Tuoi Versetti");
+}
 
 
         bookView      = findViewById(R.id.autoCompleteTextView);
@@ -77,25 +96,27 @@ public class MainActivity extends AppCompatActivity {
 
         // Observer progresso indicizzazione DB
         WorkManager.getInstance(this)
-          .getWorkInfosForUniqueWorkLiveData("bible_index")
-          .observe(this, infos -> {
-              if (infos == null || infos.isEmpty()) return;
-              WorkInfo wi = infos.get(0);
-        
-              String stage = wi.getProgress().getString("stage");
-              int pct = wi.getProgress().getInt("pct", 0);
-        
-              if (wi.getState() == WorkInfo.State.ENQUEUED) {
-                  outputView.setText("Offline: indicizzazione in coda...");
-              } else if (wi.getState() == WorkInfo.State.RUNNING) {
-                  outputView.setText("Offline: indicizzazione... " + pct + "%\n" + (stage != null ? stage : ""));
-              } else if (wi.getState() == WorkInfo.State.FAILED) {
-                  String err = wi.getOutputData().getString("err");
-                  outputView.setText("Offline: indicizzazione FALLITA ❌\n" + (err != null ? err : "Errore sconosciuto"));
-              } else if (wi.getState() == WorkInfo.State.SUCCEEDED) {
-                  outputView.setText("Offline: pronto ✅");
-              }
-          });
+            .getWorkInfosForUniqueWorkLiveData("bible_index")
+            .observe(this, infos -> {
+                if (infos == null || infos.isEmpty()) return;
+                if (userSearchInProgress) return;   // <--- IMPORTANTISSIMO
+            
+                WorkInfo wi = infos.get(0);
+            
+                String stage = wi.getProgress().getString("stage");
+                int pct = wi.getProgress().getInt("pct", 0);
+            
+                if (wi.getState() == WorkInfo.State.ENQUEUED) {
+                    outputView.setText("Offline: indicizzazione in coda...");
+                } else if (wi.getState() == WorkInfo.State.RUNNING) {
+                    outputView.setText("Offline: indicizzazione... " + pct + "%\n" + (stage != null ? stage : ""));
+                } else if (wi.getState() == WorkInfo.State.FAILED) {
+                    String err = wi.getOutputData().getString("err");
+                    outputView.setText("Offline: indicizzazione FALLITA ❌\n" + (err != null ? err : "Errore sconosciuto"));
+                } else if (wi.getState() == WorkInfo.State.SUCCEEDED) {
+                    outputView.setText("Offline: pronto ✅");
+                }
+            });
 
 
         searchBtn.setOnClickListener(v -> {
@@ -168,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             executor.execute(() -> {
                 String result;
                 try {
-                    result = searchDbOnly(fLibro, fCap, fVIn, fVFin);
+                    result = searchDbThenWebAndCache(fLibro, fCap, fVIn, fVFin);
                 } catch (Exception e) {
                     result = "Errore ricerca";
                 }
@@ -197,26 +218,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /** DB-only */
-    private String searchDbOnly(String libro, int capitolo, int vIn, int vFin) {
+    private String searchDbThenWebAndCache(String libro, int capitolo, int vIn, int vFin) {
         BibleDb db = BibleDb.get(getApplicationContext());
-
-        long count = db.verseDao().countAll();
-        if (count == 0) {
-            ensureIndexWorkEnqueued();
-            return "Offline: indicizzazione in corso. Riprova tra poco.";
-        }
 
         List<String> keys = BookNameUtil.candidateKeys(libro);
         List<VerseRow> rows = db.verseDao().getRange(keys, capitolo, vIn, vFin);
+        if (rows != null && !rows.isEmpty()) return join(rows);
 
-        if (rows == null || rows.isEmpty()) {
-            return "Non trovato nel DB";
+        // se non c'è rete: fine
+        if (!isConnected()) return "Non trovato nel DB (offline)";
+
+        // fallback online + cache su DB
+        try {
+            List<VerseEntity> fetched = WolVerseFetcher.fetchRange(getApplicationContext(), libro, capitolo, vIn, vFin);
+            if (fetched == null || fetched.isEmpty()) return "Non trovato (online)";
+
+            db.verseDao().upsertAll(fetched);
+
+            // rileggi dal DB (così sei coerente col join/format)
+            rows = db.verseDao().getRange(keys, capitolo, vIn, vFin);
+            if (rows != null && !rows.isEmpty()) return join(rows);
+
+            return "Salvato, ma non rileggibile (chiavi?)";
+
+        } catch (Exception e) {
+            return "Errore online: " + e.getClass().getSimpleName();
         }
+    }
 
+    private static String join(List<VerseRow> rows) {
         StringBuilder sb = new StringBuilder();
-        for (VerseRow r : rows) {
-            sb.append(r.verse).append(" ").append(r.text).append(" ");
-        }
+        for (VerseRow r : rows) sb.append(r.verse).append(" ").append(r.text).append(" ");
         return sb.toString().trim();
     }
 
@@ -258,8 +290,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_settings) {
-            startActivity(new Intent(this, DbInspectorActivity.class)); // per ora apriamo direttamente il tool
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            try {
+                startActivity(new android.content.Intent(this, SettingsActivity.class));
+            } catch (Exception e) {
+                Toast.makeText(this, "Impostazioni non disponibili", Toast.LENGTH_SHORT).show();
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);

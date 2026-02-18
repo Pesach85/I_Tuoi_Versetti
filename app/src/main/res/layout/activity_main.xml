@@ -11,14 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.google.android.material.appbar.MaterialToolbar
+    <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/appbar"
-            app:title="@string/ricerca_biblica_per_versetti"
-            app:titleCentered="true"
-            app:titleTextColor="@android:color/white"/>
+            app:layout_collapseMode="pin" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
