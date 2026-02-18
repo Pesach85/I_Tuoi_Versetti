@@ -21,6 +21,8 @@ public class BibleIndexWorker extends Worker {
 
     private static final String PREFS = "bible_index";
     private static final String KEY_FP = "pdf_fp";
+    private static final String KEY_LAST_SUCCESS_MS = "last_success_ms";
+    private static final String KEY_LAST_ERROR = "last_error";
 
     // Header: "Libro" + "cap:inizio-fine"
     private static final Pattern HEADER = Pattern.compile(
@@ -45,12 +47,9 @@ public class BibleIndexWorker extends Worker {
         setProgressAsync(new Data.Builder().putInt("pct", 1).putString("stage", "Apro PDF").build());
         Log.i(TAG, "start. ctx=" + ctx);
 
-        File pdf = null;
-        HttpFail lastFail = null;
-
         try {
             // fingerprint per non reindicizzare inutilmente
-            pdf = PdfParser.getReadablePdfFile(ctx);
+            File pdf = PdfParser.getReadablePdfFile(ctx);
             String fp = pdf.length() + ":" + pdf.lastModified();
 
             SharedPreferences sp = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
@@ -61,6 +60,10 @@ public class BibleIndexWorker extends Worker {
 
             if (fp.equals(done)) {
                 Log.i(TAG, "skip: fingerprint unchanged");
+                sp.edit()
+                        .putLong(KEY_LAST_SUCCESS_MS, System.currentTimeMillis())
+                        .putString(KEY_LAST_ERROR, "")
+                        .apply();
                 setProgressAsync(new Data.Builder().putInt("pct", 100).putString("stage", "Già indicizzato").build());
                 return Result.success();
             }
@@ -97,6 +100,7 @@ public class BibleIndexWorker extends Worker {
             if (headers.isEmpty()) {
                 String snippet = text.length() > 500 ? text.substring(0, 500) : text;
                 Log.e(TAG, "HEADER not found. text head snippet:\n" + snippet);
+                sp.edit().putString(KEY_LAST_ERROR, "HEADER non trovato nel testo estratto dal PDF").apply();
 
                 Data out = new Data.Builder()
                         .putString("err", "HEADER non trovato nel testo estratto dal PDF (regex/estrazione).")
@@ -161,7 +165,11 @@ public class BibleIndexWorker extends Worker {
             Log.i(TAG, "inserted(approx)=" + inserted + " total(countAll)=" + total);
 
             // salva fingerprint
-            sp.edit().putString(KEY_FP, fp).apply();
+                sp.edit()
+                    .putString(KEY_FP, fp)
+                    .putLong(KEY_LAST_SUCCESS_MS, System.currentTimeMillis())
+                    .putString(KEY_LAST_ERROR, "")
+                    .apply();
 
             // invalida cache testo/indice se la usi ancora
             NwtOfflineRepository.invalidate();
@@ -171,6 +179,8 @@ public class BibleIndexWorker extends Worker {
 
         } catch (Exception e) {
             Log.e(TAG, "worker error", e);
+            SharedPreferences sp = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            sp.edit().putString(KEY_LAST_ERROR, e.getClass().getSimpleName()).apply();
             return Result.retry();
         }
     }
@@ -254,9 +264,4 @@ public class BibleIndexWorker extends Worker {
         }
     }
 
-    // solo per future estensioni (se vuoi distinguere failure “logiche”)
-    private static final class HttpFail {
-        final String msg;
-        HttpFail(String msg) { this.msg = msg; }
-    }
 }

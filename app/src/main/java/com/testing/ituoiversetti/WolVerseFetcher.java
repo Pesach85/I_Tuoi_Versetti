@@ -62,6 +62,7 @@ public final class WolVerseFetcher {
                     .replaceAll("[\\*+]+", "")
                     .replaceAll("\\s+", " ")
                     .trim();
+                text = stripLeadingVerseNumber(text, v);
 
             if (!text.isEmpty()) {
                 VerseEntity e = new VerseEntity();
@@ -74,5 +75,27 @@ public final class WolVerseFetcher {
         }
 
         return out;
+    }
+
+    private static String stripLeadingVerseNumber(String text, int verse) {
+        if (text == null) return "";
+
+        int idx = 0;
+        int n = text.length();
+        while (idx < n && Character.isWhitespace(text.charAt(idx))) idx++;
+
+        String verseStr = String.valueOf(verse);
+        int end = idx + verseStr.length();
+        if (end > n || !text.regionMatches(idx, verseStr, 0, verseStr.length())) {
+            return text.trim();
+        }
+
+        if (end < n) {
+            char c = text.charAt(end);
+            if (!Character.isWhitespace(c)) return text.trim();
+        }
+
+        while (end < n && Character.isWhitespace(text.charAt(end))) end++;
+        return text.substring(end).trim();
     }
 }

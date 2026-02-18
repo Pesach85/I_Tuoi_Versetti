@@ -24,6 +24,14 @@ public interface VerseDao {
     @Query("DELETE FROM verses")
     void clearAll();
 
+    @Query("SELECT bookKey, chapter, verse, text FROM verses ORDER BY bookKey, chapter, verse LIMIT :limit OFFSET :offset")
+    List<VerseEntity> pageAll(int limit, int offset);
+
+        @Query("SELECT bookKey, chapter, verse, text FROM verses " +
+            "WHERE text LIKE '%' || :term || '%' " +
+            "ORDER BY bookKey, chapter, verse LIMIT :limit")
+        List<TopicVerseRow> searchByTopicTerm(String term, int limit);
+
     // ---- TOOL: ispezione DB ----
     @Query("SELECT bookKey AS bookKey, COUNT(*) AS cnt FROM verses GROUP BY bookKey ORDER BY bookKey")
     List<BookCount> listBooks();

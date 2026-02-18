@@ -3,6 +3,11 @@
     <string name="app_name">I Tuoi Versetti</string>
 
     <string name="ricerca_biblica_per_versetti">Ricerca Biblica per versetti</string>
+    <string name="sottotitolo_ricerca">Consulta rapidamente capitolo e versetti con stile di lettura chiaro e ordinato.</string>
+    <string name="argomento_biblico_hint">Argomento biblico (es. fede, speranza, preghiera)</string>
+    <string name="ricerca_ai_semantica">Ricerca AI semantica (consigliata)</string>
+    <string name="modalita_semplice">semplice</string>
+    <string name="modalita_ai">AI semantica</string>
     <string name="libro_biblico">Libro biblico</string>
     <string name="inserisci_il_capitolo">Inserisci il capitolo</string>
     <string name="versetto_iniziale">Versetto iniziale</string>
@@ -12,6 +17,35 @@
     <string name="avvertenze">Avvertenze</string>
     <string name="todo">Azione</string>
     <string name="impostazioni">Impostazioni</string>
+    <string name="settings_intro">Strumenti diagnostici per verificare rete, database locale e indicizzazione offline.</string>
+    <string name="debug_status_title">Stato applicazione</string>
+    <string name="aggiorna_stato">Aggiorna stato</string>
+    <string name="avvia_reindicizzazione">Avvia reindicizzazione offline</string>
+    <string name="apri_db_inspector">Apri DB Inspector</string>
+    <string name="copia_report_diagnostico">Copia report diagnostico</string>
+    <string name="condividi_report_diagnostico">Condividi report diagnostico</string>
+    <string name="report_diagnostico_titolo">Report diagnostico</string>
+    <string name="reindex_started">Reindicizzazione avviata</string>
+    <string name="db_inspector_not_available">DB Inspector non disponibile</string>
+    <string name="report_copiato">Report diagnostico copiato negli appunti</string>
+    <string name="share_not_available">Nessuna app disponibile per la condivisione</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
+    <string name="nessuno">Nessuno</string>
+    <string name="mai">Mai</string>
+    <string name="nessun_job">Nessun job</string>
+    <string name="errore_lettura">Errore lettura</string>
+    <string name="stato_rete">Rete: %1$s</string>
+    <string name="stato_db">DB locale: %1$d versetti indicizzati</string>
+    <string name="stato_db_errore">DB locale: errore (%1$s)</string>
+    <string name="stato_indicizzazione">Indicizzazione: %1$s</string>
+    <string name="ultimo_aggiornamento">Ultimo aggiornamento DB: %1$s</string>
+    <string name="ultimo_errore">Ultimo errore indicizzazione: %1$s</string>
+    <string name="pdf_ultimo_check">Ultimo controllo aggiornamento PDF: %1$s</string>
+    <string name="pdf_ultimo_errore">Ultimo errore aggiornamento PDF: %1$s</string>
+    <string name="ricerca_argomento_in_corso">Ricerca per argomento in corso...</string>
+    <string name="argomento_e_riferimento_conflitto">Usa argomento oppure riferimento, non entrambi</string>
+    <string name="argomento_non_trovato">Nessun versetto trovato per l\'argomento richiesto</string>
 
     <string name="note_legali">
         Note: questa applicazione viene distribuita e rilasciata per solo scopo informativo e
