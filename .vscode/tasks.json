@@ -1,0 +1,80 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Debug (safe)",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "gradlew.bat :app:assembleDebug --no-daemon --stacktrace"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install Debug (adb)",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "adb install -r app\\build\\outputs\\apk\\debug\\app-debug.apk"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build + Install Debug (safe)",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Build Debug (safe)",
+        "Install Debug (adb)"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Emulator Pixel_7",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "\"D:\\Android\\android-sdk\\emulator\\emulator.exe\" -avd Pixel_7"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "ANDROID_HOME": "D:\\Android\\android-sdk",
+          "ANDROID_SDK_ROOT": "D:\\Android\\android-sdk"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Emulator Pixel_7 (cold boot)",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "\"D:\\Android\\android-sdk\\emulator\\emulator.exe\" -avd Pixel_7 -no-snapshot-load"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "ANDROID_HOME": "D:\\Android\\android-sdk",
+          "ANDROID_SDK_ROOT": "D:\\Android\\android-sdk"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

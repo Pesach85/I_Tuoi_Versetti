@@ -1,14 +1,13 @@
 package com.testing.ituoiversetti;
 
-import android.content.Context;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.ExistingWorkPolicy;
@@ -16,12 +15,12 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 
-import java.util.List;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,6 +29,7 @@ public class SettingsActivity extends AppCompatActivity {
     private static final String PREFS_INDEX = "bible_index";
     private static final String KEY_LAST_SUCCESS_MS = "last_success_ms";
     private static final String KEY_LAST_ERROR = "last_error";
+
     private static final String PREFS_PDF = "pdf_update_meta";
     private static final String KEY_PDF_LAST_CHECK_MS = "last_check_ms";
     private static final String KEY_PDF_LAST_ERROR = "last_error";
@@ -49,11 +49,13 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        // Toolbar back
         MaterialToolbar toolbar = findViewById(R.id.settingsToolbar);
         if (toolbar != null) {
             toolbar.setNavigationOnClickListener(v -> finish());
         }
 
+        // TextViews
         tvNetStatus = findViewById(R.id.tvNetStatus);
         tvDbStatus = findViewById(R.id.tvDbStatus);
         tvIndexStatus = findViewById(R.id.tvIndexStatus);
@@ -62,34 +64,53 @@ public class SettingsActivity extends AppCompatActivity {
         tvPdfLastCheck = findViewById(R.id.tvPdfLastCheck);
         tvPdfLastError = findViewById(R.id.tvPdfLastError);
 
+        // Buttons
         MaterialButton btnRefreshStatus = findViewById(R.id.btnRefreshStatus);
         MaterialButton btnReindex = findViewById(R.id.btnReindex);
         MaterialButton btnOpenDbInspector = findViewById(R.id.btnOpenDbInspector);
         MaterialButton btnCopyDiagnosticReport = findViewById(R.id.btnCopyDiagnosticReport);
         MaterialButton btnShareDiagnosticReport = findViewById(R.id.btnShareDiagnosticReport);
 
-        btnRefreshStatus.setOnClickListener(v -> refreshStatus());
-
-        btnReindex.setOnClickListener(v -> {
-            WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork(
-                    "bible_index",
-                    ExistingWorkPolicy.REPLACE,
-                    new OneTimeWorkRequest.Builder(BibleIndexWorker.class).build()
+        // Optional: open batch fetch screen (se presente nel layout)
+        MaterialButton batchBtn = findViewById(R.id.openBatchBtn);
+        if (batchBtn != null) {
+            batchBtn.setOnClickListener(v ->
+                    startActivity(new Intent(this, BatchVerseFetchActivity.class))
             );
-            Toast.makeText(this, getString(R.string.reindex_started), Toast.LENGTH_SHORT).show();
-            refreshStatus();
-        });
+        }
 
-        btnOpenDbInspector.setOnClickListener(v -> {
-            try {
-                startActivity(new android.content.Intent(this, DbInspectorActivity.class));
-            } catch (Exception e) {
-                Toast.makeText(this, getString(R.string.db_inspector_not_available), Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (btnRefreshStatus != null) {
+            btnRefreshStatus.setOnClickListener(v -> refreshStatus());
+        }
 
-        btnCopyDiagnosticReport.setOnClickListener(v -> copyDiagnosticReport());
-        btnShareDiagnosticReport.setOnClickListener(v -> shareDiagnosticReport());
+        if (btnReindex != null) {
+            btnReindex.setOnClickListener(v -> {
+                WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork(
+                        "bible_index",
+                        ExistingWorkPolicy.REPLACE,
+                        new OneTimeWorkRequest.Builder(BibleIndexWorker.class).build()
+                );
+                Toast.makeText(this, getString(R.string.reindex_started), Toast.LENGTH_SHORT).show();
+                refreshStatus();
+            });
+        }
+
+        if (btnOpenDbInspector != null) {
+            btnOpenDbInspector.setOnClickListener(v -> {
+                try {
+                    startActivity(new Intent(this, DbInspectorActivity.class));
+                } catch (Exception e) {
+                    Toast.makeText(this, getString(R.string.db_inspector_not_available), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (btnCopyDiagnosticReport != null) {
+            btnCopyDiagnosticReport.setOnClickListener(v -> copyDiagnosticReport());
+        }
+        if (btnShareDiagnosticReport != null) {
+            btnShareDiagnosticReport.setOnClickListener(v -> shareDiagnosticReport());
+        }
 
         refreshStatus();
     }
@@ -97,7 +118,6 @@ public class SettingsActivity extends AppCompatActivity {
     private void copyDiagnosticReport() {
         executor.execute(() -> {
             String report = buildDiagnosticReport();
-
             runOnUiThread(() -> {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 if (clipboard != null) {
@@ -127,6 +147,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private String buildDiagnosticReport() {
         String net = isConnected() ? getString(R.string.online) : getString(R.string.offline);
+
         String dbText;
         String indexText;
         String lastSync;
@@ -225,7 +246,12 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void refreshStatus() {
-        tvNetStatus.setText(getString(R.string.stato_rete, isConnected() ? getString(R.string.online) : getString(R.string.offline)));
+        if (tvNetStatus != null) {
+            tvNetStatus.setText(getString(
+                    R.string.stato_rete,
+                    isConnected() ? getString(R.string.online) : getString(R.string.offline)
+            ));
+        }
 
         executor.execute(() -> {
             String dbText;
@@ -317,13 +343,14 @@ public class SettingsActivity extends AppCompatActivity {
             String finalLastErrorText = lastErrorText;
             String finalPdfLastCheckText = pdfLastCheckText;
             String finalPdfLastErrorText = pdfLastErrorText;
+
             runOnUiThread(() -> {
-                tvDbStatus.setText(finalDbText);
-                tvIndexStatus.setText(finalIndexText);
-                tvLastSync.setText(finalLastSyncText);
-                tvLastError.setText(finalLastErrorText);
-                tvPdfLastCheck.setText(finalPdfLastCheckText);
-                tvPdfLastError.setText(finalPdfLastErrorText);
+                if (tvDbStatus != null) tvDbStatus.setText(finalDbText);
+                if (tvIndexStatus != null) tvIndexStatus.setText(finalIndexText);
+                if (tvLastSync != null) tvLastSync.setText(finalLastSyncText);
+                if (tvLastError != null) tvLastError.setText(finalLastErrorText);
+                if (tvPdfLastCheck != null) tvPdfLastCheck.setText(finalPdfLastCheckText);
+                if (tvPdfLastError != null) tvPdfLastError.setText(finalPdfLastErrorText);
             });
         });
     }

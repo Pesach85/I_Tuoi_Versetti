@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/batchLibro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Libro"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/batchCapitolo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Capitolo iniziale"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/batchVersettoIn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Versetto iniziale"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/batchVersettoFin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Versetto finale"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/batchIterazioni"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Numero iterazioni"
+        android:inputType="number" />
+
+    <Button
+        android:id="@+id/batchStartBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Avvia batch" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <TextView
+            android:id="@+id/batchOutput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:background="#f5f5f5"
+            android:scrollbars="vertical" />
+    </ScrollView>
+
+</LinearLayout>

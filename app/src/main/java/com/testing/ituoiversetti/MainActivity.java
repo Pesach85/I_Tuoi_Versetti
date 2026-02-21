@@ -41,6 +41,48 @@ import android.view.MenuItem;
 
 
 public class MainActivity extends AppCompatActivity {
+    /** Funzione statica per ricerca batch */
+    public static String searchDbThenWebAndCacheStatic(android.content.Context ctx, String libro, int capitolo, int vIn, int vFin) {
+        BibleDb db = BibleDb.get(ctx);
+        List<String> keys = BookNameUtil.candidateKeys(libro);
+        List<VerseRow> rows = db.verseDao().getRange(keys, capitolo, vIn, vFin);
+        if (rows != null && !rows.isEmpty()) return joinStatic(rows);
+        // se non c'è rete: fine
+        android.net.ConnectivityManager cm = (android.net.ConnectivityManager) ctx.getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        boolean connected = false;
+        if (cm != null) {
+            android.net.Network n = cm.getActiveNetwork();
+            if (n != null) {
+                android.net.NetworkCapabilities caps = cm.getNetworkCapabilities(n);
+                connected = caps != null && caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET);
+            }
+        }
+        if (!connected) return "Non trovato nel DB (offline)";
+        // fallback online + cache su DB
+        try {
+            List<VerseEntity> fetched = WolVerseFetcher.fetchRange(ctx, libro, capitolo, vIn, vFin);
+            if (fetched == null || fetched.isEmpty()) return "Non trovato (online)";
+            db.verseDao().upsertAll(fetched);
+            rows = db.verseDao().getRange(keys, capitolo, vIn, vFin);
+            if (rows != null && !rows.isEmpty()) return joinStatic(rows);
+            return "Salvato, ma non rileggibile (chiavi?)";
+        } catch (Exception e) {
+            return "Errore online: " + e.getClass().getSimpleName();
+        }
+    }
+
+    private static String joinStatic(List<VerseRow> rows) {
+        StringBuilder sb = new StringBuilder();
+        for (VerseRow r : rows) {
+            String text = r.text == null ? "" : r.text.trim();
+            if (startsWithVersePrefix(text, r.verse)) {
+                sb.append(text).append(" ");
+            } else {
+                sb.append(r.verse).append(" ").append(text).append(" ");
+            }
+        }
+        return sb.toString().trim();
+    }
 
     private static final String PREFS_DB_FIX = "db_fixes";
     private static final String KEY_VERSE_PREFIX_FIX_DONE = "verse_prefix_fix_done";

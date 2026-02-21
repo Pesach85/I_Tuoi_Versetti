@@ -32,6 +32,14 @@ set APP_HOME=%DIRNAME%
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
+@rem Stabilità su Windows/VS Code: evita opzioni JVM d'ambiente incompatibili.
+@rem Per mantenere le env vars originali, imposta ITUOI_KEEP_JAVA_OPTS=1.
+if not defined ITUOI_KEEP_JAVA_OPTS (
+	set "GRADLE_OPTS="
+	set "JAVA_TOOL_OPTIONS="
+	set "JDK_JAVA_OPTIONS="
+)
+
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
 

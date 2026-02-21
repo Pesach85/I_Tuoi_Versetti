@@ -35,7 +35,6 @@ public class PdfUpdateWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        File target = new File(getApplicationContext().getFilesDir(), PDF_NAME);
         File tmp = new File(getApplicationContext().getCacheDir(), PDF_NAME + ".download");
 
         HttpURLConnection conn = null;
@@ -84,21 +83,8 @@ public class PdfUpdateWorker extends Worker {
                 return Result.retry(); // sanity
             }
 
-            // promozione (best effort)
-            if (target.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                target.delete();
-            }
-
-            if (!tmp.renameTo(target)) {
-                try (InputStream in = new FileInputStream(tmp);
-                     OutputStream out = new FileOutputStream(target)) {
-                    byte[] buf = new byte[8192];
-                    int r;
-                    while ((r = in.read(buf)) != -1) out.write(buf, 0, r);
-                }
-                //noinspection ResultOfMethodCallIgnored
-                tmp.delete();
+            try (InputStream in = new FileInputStream(tmp)) {
+                PdfParser.replaceUpdatedPdf(getApplicationContext(), in);
             }
 
             // salva metadata per update “smart”
@@ -111,7 +97,7 @@ public class PdfUpdateWorker extends Worker {
                     .apply();
 
             // invalida cache testo/indice (se usi ancora repository in memoria)
-            NwtOfflineRepository.invalidate();
+            // già gestita da PdfParser.replaceUpdatedPdf
 
             // ricostruisci DB offline (worker unico)
             WorkManager.getInstance(getApplicationContext()).enqueueUniqueWork(

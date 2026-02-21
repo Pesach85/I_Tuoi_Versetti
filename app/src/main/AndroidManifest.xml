@@ -23,6 +23,12 @@
         </activity>
 
         <activity
+            android:name=".BatchVerseFetchActivity"
+            android:label="Batch Versetti"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:exported="false" />
+
+        <activity
             android:name=".SettingsActivity"
             android:exported="false" />
 

@@ -6,6 +6,8 @@
   "java.jdt.ls.java.home": "D:\\JDK_17",
   "java.import.gradle.java.home": "D:\\JDK_17",
   "gradle.javaHome": "D:\\JDK_17",
+  "java.import.gradle.arguments": "--no-daemon --stacktrace",
+  "java.import.gradle.jvmArguments": "-Xmx1024m -XX:MaxMetaspaceSize=256m -Dfile.encoding=UTF-8",
 
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.format.settings.url": ".vscode/java-formatter.xml"
