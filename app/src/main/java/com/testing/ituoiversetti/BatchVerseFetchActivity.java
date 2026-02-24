@@ -44,7 +44,8 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
 
     private void batchFetch(String libro, int capitolo, int vIn, int vFin, int iter) {
         Handler handler = new Handler(Looper.getMainLooper());
-        Runnable task = new Runnable() {
+        Runnable[] task = new Runnable[1];
+        task[0] = new Runnable() {
             int current = 0;
             int cap = capitolo;
             @Override
@@ -55,15 +56,36 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
                     return;
                 }
                 outputView.append("\nRicerca: " + libro + " " + cap + ": " + vIn + "-" + vFin);
-                // Esegui la ricerca (puoi richiamare la stessa logica di MainActivity)
-                String result = MainActivity.searchDbThenWebAndCacheStatic(getApplicationContext(), libro, cap, vIn, vFin);
-                outputView.append("\nRisultato: " + result);
-                current++;
-                cap++;
-                handler.postDelayed(this, 5000);
+                new Thread(() -> {
+                    try {
+                        String result = MainActivity.searchDbThenWebAndCacheStatic(
+                            getApplicationContext(), libro, cap, vIn, vFin
+                        );
+                        handler.post(() -> {
+                            outputView.append("\nRisultato: " + result);
+                            current++;
+                            cap++;
+                            handler.postDelayed(task[0], 5000);
+                        });
+                    } catch (Exception e) {
+                        handler.post(() -> outputView.append("\nERRORE: " + e.getClass().getName() + " - " + e.getMessage()));
+                        try {
+                            java.io.FileWriter fw = new java.io.FileWriter(
+                                getExternalFilesDir(null) + "/crash_log.txt", true
+                            );
+                            fw.write(e.toString() + "\n");
+                            fw.close();
+                        } catch (Exception ignored) {}
+                        handler.post(() -> {
+                            current++;
+                            cap++;
+                            handler.postDelayed(task[0], 5000);
+                        });
+                    }
+                }).start();
             }
         };
-        handler.post(task);
+        handler.post(task[0]);
     }
 
     private int parseInt(EditText v) {

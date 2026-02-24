@@ -36,6 +36,12 @@
             android:name=".DbInspectorActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".DbManagerActivity"
+            android:label="Gestione DB"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:exported="false" />
+
     </application>
 
 </manifest>

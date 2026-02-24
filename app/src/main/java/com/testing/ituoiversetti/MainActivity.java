@@ -799,6 +799,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Impostazioni non disponibili", Toast.LENGTH_SHORT).show();
             }
             return true;
+        } else if (id == R.id.action_db_manager) {
+            try {
+                startActivity(new android.content.Intent(this, DbManagerActivity.class));
+            } catch (Exception e) {
+                Toast.makeText(this, "Gestione DB non disponibile", Toast.LENGTH_SHORT).show();
+            }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

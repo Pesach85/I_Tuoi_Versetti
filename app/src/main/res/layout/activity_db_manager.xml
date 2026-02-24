@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/dbInfoView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Info DB"
+        android:textSize="18sp"
+        android:padding="8dp" />
+
+    <Button
+        android:id="@+id/btnDeleteDb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cancella DB"
+        android:layout_marginTop="24dp" />
+
+    <Button
+        android:id="@+id/btnExportDb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Esporta DB"
+        android:layout_marginTop="12dp" />
+
+    <Button
+        android:id="@+id/btnImportDb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Importa DB"
+        android:layout_marginTop="12dp" />
+
+    <EditText
+        android:id="@+id/sqlInputView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Query SQL (ALTER, UPDATE, ecc.)"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:layout_marginTop="24dp" />
+
+    <Button
+        android:id="@+id/btnExecSql"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Esegui SQL"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>
