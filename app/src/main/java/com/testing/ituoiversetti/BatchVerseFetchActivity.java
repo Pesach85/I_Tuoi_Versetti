@@ -4,11 +4,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 import java.io.FileWriter;
 import java.lang.ref.WeakReference;
@@ -20,16 +20,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BatchVerseFetchActivity extends AppCompatActivity {
 
-    private EditText libroView, capitoloView, versettoInView, versettoFinView, iterazioniView;
-    private MaterialAutoCompleteTextView chapterSuggestView;
+    private AutoCompleteTextView libroView;
+    private EditText capitoloView, versettoInView, versettoFinView, iterazioniView;
     private Button startBtn, stopBtn;
     private TextView outputView;
 
-    // Executor dedicato a questo Activity, chiuso in onDestroy
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler(Looper.getMainLooper());
-
-    // Flag per interrompere il batch dall'esterno
     private final AtomicBoolean stopRequested = new AtomicBoolean(false);
 
     // -------------------------------------------------------------------------
@@ -41,19 +38,18 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_batch_verse_fetch);
 
-        libroView       = findViewById(R.id.batchLibro);
-        chapterSuggestView = findViewById(R.id.chapterSuggestView);
-        capitoloView    = findViewById(R.id.batchCapitolo);
-        versettoInView  = findViewById(R.id.batchVersettoIn);
-        versettoFinView = findViewById(R.id.batchVersettoFin);
-        iterazioniView  = findViewById(R.id.batchIterazioni);
-        startBtn        = findViewById(R.id.batchStartBtn);
-        stopBtn         = findViewById(R.id.batchStopBtn);
-        outputView      = findViewById(R.id.batchOutput);
+        libroView          = findViewById(R.id.batchLibro);
+        capitoloView       = findViewById(R.id.batchCapitolo);
+        versettoInView     = findViewById(R.id.batchVersettoIn);
+        versettoFinView    = findViewById(R.id.batchVersettoFin);
+        iterazioniView     = findViewById(R.id.batchIterazioni);
+        startBtn           = findViewById(R.id.batchStartBtn);
+        stopBtn            = findViewById(R.id.batchStopBtn);
+        outputView         = findViewById(R.id.batchOutput);
 
         stopBtn.setEnabled(false);
 
-        setupChapterSuggestions();
+        setupBookSuggestions();
 
         startBtn.setOnClickListener(v -> onStartClicked());
         stopBtn .setOnClickListener(v -> onStopClicked());
@@ -71,21 +67,21 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
     // -------------------------------------------------------------------------
 
     private void onStartClicked() {
-        String libro  = libroView.getText().toString().trim();
-        int capitolo  = parseInt(capitoloView);
-        int vIn       = parseInt(versettoInView);
-        int vFin      = parseInt(versettoFinView);
-        int iter      = parseInt(iterazioniView);
+        String libro = libroView.getText().toString().trim();
+        int capitolo = parseInt(capitoloView);
+        int vIn      = parseInt(versettoInView);
+        int vFin     = parseInt(versettoFinView);
+        int iter     = parseInt(iterazioniView);
 
         if (libro.isEmpty() || capitolo <= 0 || vIn <= 0 || vFin < vIn || iter <= 0) {
-            outputView.setText("Dati non validi");
+            outputView.setText("Dati non validi. Controlla tutti i campi.");
             return;
         }
 
         stopRequested.set(false);
         startBtn.setEnabled(false);
         stopBtn .setEnabled(true);
-        outputView.setText("Inizio batch...");
+        outputView.setText("Inizio batch...\n");
 
         batchFetch(libro, capitolo, vIn, vFin, iter);
     }
@@ -94,6 +90,18 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
         stopRequested.set(true);
         stopBtn.setEnabled(false);
         outputView.append("\nInterruzione richiesta...");
+    }
+
+    // -------------------------------------------------------------------------
+    // Autocomplete libri
+    // -------------------------------------------------------------------------
+
+    private void setupBookSuggestions() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                new Bibbia().composeBibbia());
+        libroView.setAdapter(adapter);
     }
 
     // -------------------------------------------------------------------------
@@ -117,7 +125,7 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
                     }
                 }
             } catch (Exception e) {
-                error = "Errore suggerimenti: " + e.getMessage();
+                error = "Errore suggerimenti capitolo: " + e.getMessage();
             }
             final List<String> finalChapters = chapters;
             final String finalError = error;
@@ -131,7 +139,6 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
                             a,
                             android.R.layout.simple_dropdown_item_1line,
                             finalChapters);
-                    a.chapterSuggestView.setAdapter(adapter);
                 }
             });
         });
@@ -141,12 +148,6 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
     // Batch logic
     // -------------------------------------------------------------------------
 
-    /**
-     * Avvia il batch in modo ricorsivo-asincrono.
-     * Ogni iterazione viene eseguita su executor (thread unico),
-     * con un ritardo di 5 secondi tra un'iterazione e la successiva.
-     * Usa WeakReference per non tenere in vita l'Activity.
-     */
     private void batchFetch(String libro, int capitoloInizio, int vIn, int vFin, int totalIter) {
         WeakReference<BatchVerseFetchActivity> ref = new WeakReference<>(this);
         scheduleIteration(ref, libro, capitoloInizio, vIn, vFin, totalIter, 0, 0);
@@ -158,14 +159,12 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
             int vIn, int vFin,
             int totalIter, int currentIter, int capOffset) {
 
-        // Ritardo 0 per la prima iterazione, 5000ms per le successive
         long delay = (currentIter == 0) ? 0L : 5000L;
 
         handler.postDelayed(() -> {
             BatchVerseFetchActivity a = ref.get();
             if (a == null || a.isDestroyed() || a.isFinishing()) return;
 
-            // Batch completato
             if (currentIter >= totalIter) {
                 a.outputView.append("\nBatch completato.");
                 a.startBtn.setEnabled(true);
@@ -173,7 +172,6 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
                 return;
             }
 
-            // Stop richiesto dall'utente
             if (a.stopRequested.get()) {
                 a.outputView.append("\nBatch interrotto.");
                 a.startBtn.setEnabled(true);
@@ -182,10 +180,9 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
             }
 
             int cap = capitoloInizio + capOffset;
-            a.outputView.append("\nRicerca " + (currentIter + 1) + "/" + totalIter
-                    + ": " + libro + " " + cap + ": " + vIn + "-" + vFin);
+            a.outputView.append("Ricerca " + (currentIter + 1) + "/" + totalIter
+                    + ": " + libro + " " + cap + ":" + vIn + "-" + vFin + "\n");
 
-            // Esegue la ricerca sul thread dell'executor (non crea un nuovo Thread ogni volta)
             a.executor.execute(() -> {
                 String result;
                 boolean success = true;
@@ -195,7 +192,6 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     result = "ERRORE: " + e.getClass().getSimpleName() + " - " + e.getMessage();
                     success = false;
-                    // Scrittura log su thread background — corretto
                     writeErrorLog(a, e);
                 }
 
@@ -204,9 +200,8 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
                 handler.post(() -> {
                     BatchVerseFetchActivity act = ref.get();
                     if (act == null || act.isDestroyed() || act.isFinishing()) return;
-                    act.outputView.append("\n" + (finalSuccess ? "Risultato: " : "") + finalResult);
+                    act.outputView.append((finalSuccess ? "OK: " : "") + finalResult + "\n\n");
 
-                    // Pianifica l'iterazione successiva
                     scheduleIteration(ref, libro, capitoloInizio,
                             vIn, vFin, totalIter, currentIter + 1, capOffset + 1);
                 });
@@ -226,9 +221,7 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
             try (FileWriter fw = new FileWriter(logFile, true)) {
                 fw.write(new java.util.Date() + " - " + e + "\n");
             }
-        } catch (Exception ignored) {
-            // Se non riesce a scrivere il log, non blocchiamo il batch
-        }
+        } catch (Exception ignored) {}
     }
 
     private int parseInt(EditText v) {

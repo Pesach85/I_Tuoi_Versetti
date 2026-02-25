@@ -23,7 +23,6 @@ public class DbManagerActivity extends AppCompatActivity {
     private Button btnDeleteDb, btnExportDb, btnImportDb;
     private TextView sqlInputView;
     private Button btnExecSql;
-    private AutoCompleteTextView chapterSuggestView;
 
     private static final int MAX_SQL_ROWS_DISPLAY = 100;
 
@@ -45,10 +44,8 @@ public class DbManagerActivity extends AppCompatActivity {
         btnImportDb       = findViewById(R.id.btnImportDb);
         sqlInputView      = findViewById(R.id.sqlInputView);
         btnExecSql        = findViewById(R.id.btnExecSql);
-        chapterSuggestView = findViewById(R.id.chapterSuggestView);
 
         refreshDbInfo();
-        setupChapterSuggestions();
 
         btnDeleteDb.setOnClickListener(v -> deleteDb());
         btnExportDb.setOnClickListener(v -> exportDb());
@@ -138,7 +135,6 @@ public class DbManagerActivity extends AppCompatActivity {
                             a,
                             android.R.layout.simple_dropdown_item_1line,
                             finalChapters);
-                    a.chapterSuggestView.setAdapter(adapter);
                 }
             });
         });

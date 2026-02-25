@@ -5,29 +5,17 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Libro -->
-    <EditText
+    <!-- Libro con autocompletamento -->
+    <AutoCompleteTextView
         android:id="@+id/batchLibro"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Libro"
-        android:inputType="text"
-        android:imeOptions="actionNext" />
-
-    <!-- Autocomplete capitolo — id allineato al Java -->
-    <com.google.android.material.textfield.MaterialAutoCompleteTextView
-        android:id="@+id/chapterSuggestView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Capitolo (autocomplete)"
-        android:gravity="start|center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
         android:inputType="textCapWords"
         android:imeOptions="actionNext"
         android:completionThreshold="1" />
 
-    <!-- Capitolo iniziale (numero) -->
+    <!-- Capitolo iniziale -->
     <EditText
         android:id="@+id/batchCapitolo"
         android:layout_width="match_parent"
@@ -100,7 +88,6 @@
             android:id="@+id/batchOutput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=""
             android:textSize="14sp"
             android:padding="8dp"
             android:background="#f5f5f5"
