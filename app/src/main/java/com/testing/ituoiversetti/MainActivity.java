@@ -279,6 +279,47 @@ public class MainActivity extends AppCompatActivity {
                         Uri.parse("https://play.google.com/store/apps/details?id=com.whatsapp")));
             }
         });
+
+        // Copia testo
+        findViewById(R.id.btnCopy).setOnClickListener(v -> {
+            String testo = safeText(outputView);
+            if (testo.isEmpty()) return;
+            android.content.ClipboardManager clipboard =
+                    (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            clipboard.setPrimaryClip(
+                    android.content.ClipData.newPlainText("versetto", testo));
+            toast("Testo copiato");
+        });
+        
+        // Condividi generico
+        findViewById(R.id.btnShare).setOnClickListener(v -> {
+            String testo = safeText(outputView);
+            if (testo.isEmpty()) return;
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, testo);
+            startActivity(Intent.createChooser(shareIntent, "Condividi versetto"));
+        });
+        
+        // Genera immagine artistica
+        findViewById(R.id.btnGenerateImage).setOnClickListener(v -> {
+            String testo = safeText(outputView);
+            if (testo.isEmpty()) { toast("Nessun versetto da illustrare"); return; }
+            Intent intent = new Intent(this, VerseImageActivity.class);
+            intent.putExtra("verse_text", testo);
+            startActivity(intent);
+        });
+        
+        // Salva preferiti
+        findViewById(R.id.btnFavorite).setOnClickListener(v -> {
+            String testo = safeText(outputView);
+            if (testo.isEmpty()) return;
+            android.content.SharedPreferences prefs =
+                    getSharedPreferences("favorites", Context.MODE_PRIVATE);
+            String key = "fav_" + System.currentTimeMillis();
+            prefs.edit().putString(key, testo).apply();
+            toast("Salvato nei preferiti ✓");
+        });
     }
 
     @Override

@@ -157,47 +157,168 @@
                 android:text="@string/cerca"/>
 
             <!-- Risultato -->
+            <!-- Risultato -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardCornerRadius="@dimen/corner_radius"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
                 app:strokeColor="@color/outline"
                 app:strokeWidth="1dp"
                 app:cardUseCompatPadding="true">
-
+            
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <MultiAutoCompleteTextView
-                        android:id="@+id/multiAutoCompleteTextView"
+                    android:orientation="vertical">
+            
+                    <!-- Header card con icona libro -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="160dp"
-                        android:hint="@string/risultato_della_ricerca"
-                        android:fontFamily="serif"
-                        android:textIsSelectable="true"
-                        android:focusable="false"
-                        android:clickable="false"
-                        android:longClickable="false"
-                        android:scrollbars="vertical"
-                        android:textSize="18sp"
-                        android:lineSpacingExtra="2dp"
-                        android:gravity="start|top"/>
-
-                    <ImageButton
-                        android:id="@+id/imageButton"
-                        android:layout_width="@dimen/whatsapp_btn"
-                        android:layout_height="@dimen/whatsapp_btn"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="10dp"
-                        android:background="@android:color/transparent"
-                        android:contentDescription="@string/todo"
-                        android:scaleType="centerInside"
-                        app:srcCompat="@mipmap/pngitem_1485047"/>
+                        android:orientation="horizontal"
+                        android:padding="12dp"
+                        android:gravity="center_vertical"
+                        android:background="@color/primary_container">
+            
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_menu_book"
+                            app:tint="@color/on_primary_container"
+                            android:contentDescription="@null"/>
+            
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="@string/risultato_della_ricerca"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08"
+                            android:textAllCaps="true"
+                            android:textColor="@color/on_primary_container"/>
+            
+                    </LinearLayout>
+            
+                    <!-- Testo versetto -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="8dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+            
+                        <!-- Virgoletta decorativa -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="\u201C"
+                            android:textSize="48sp"
+                            android:textColor="@color/primary"
+                            android:alpha="0.25"
+                            android:fontFamily="serif"
+                            android:lineSpacingExtra="0dp"
+                            android:includeFontPadding="false"
+                            android:layout_marginTop="-8dp"
+                            android:layout_marginEnd="4dp"/>
+            
+                        <MultiAutoCompleteTextView
+                            android:id="@+id/multiAutoCompleteTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="100dp"
+                            android:hint="@string/risultato_della_ricerca"
+                            android:fontFamily="serif"
+                            android:textIsSelectable="true"
+                            android:focusable="false"
+                            android:clickable="false"
+                            android:longClickable="false"
+                            android:scrollbars="vertical"
+                            android:textSize="18sp"
+                            android:lineSpacingExtra="5dp"
+                            android:letterSpacing="0.01"
+                            android:gravity="start|top"
+                            android:textColor="@color/on_background"/>
+            
+                    </LinearLayout>
+            
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="@color/outline"
+                        android:alpha="0.3"/>
+            
+                    <!-- Azioni -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp"
+                        android:gravity="center">
+            
+                        <!-- Condividi WhatsApp -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/imageButton"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="Condividi su WhatsApp"
+                            app:icon="@mipmap/pngitem_1485047"
+                            app:iconSize="28dp"/>
+            
+                        <!-- Copia testo -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCopy"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="Copia testo"
+                            app:icon="@drawable/ic_content_copy"
+                            app:iconSize="24dp"/>
+            
+                        <!-- Genera immagine artistica -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnGenerateImage"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="Genera immagine"
+                            app:icon="@drawable/ic_palette"
+                            app:iconSize="24dp"/>
+            
+                        <!-- Condividi generico -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnShare"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="Condividi"
+                            app:icon="@drawable/ic_share"
+                            app:iconSize="24dp"/>
+            
+                        <!-- Salva preferiti -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnFavorite"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="Salva nei preferiti"
+                            app:icon="@drawable/ic_bookmark_border"
+                            app:iconSize="24dp"/>
+            
+                    </LinearLayout>
+            
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
