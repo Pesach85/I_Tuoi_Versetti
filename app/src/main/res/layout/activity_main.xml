@@ -267,16 +267,6 @@
                         android:paddingEnd="4dp"
                         android:gravity="center">
             
-                        <!-- Condividi WhatsApp -->
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/imageButton"
-                            style="@style/Widget.Material3.Button.IconButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:contentDescription="Condividi su WhatsApp"
-                            app:icon="@mipmap/pngitem_1485047"
-                            app:iconSize="28dp"/>
-            
                         <!-- Copia testo -->
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnCopy"

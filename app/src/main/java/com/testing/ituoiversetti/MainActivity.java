@@ -34,6 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.google.android.material.button.MaterialButton;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -121,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
         bookView.setAdapter(arrayAdapter);
 
         Button searchBtn   = findViewById(R.id.button);
-        ImageButton whatsappBtn = findViewById(R.id.imageButton);
 
         executor.execute(() -> {
             sanitizeVersePrefixOnce();
@@ -266,20 +266,6 @@ public class MainActivity extends AppCompatActivity {
                 });
             });
         });
-
-        whatsappBtn.setOnClickListener(v -> {
-            Intent i = new Intent(Intent.ACTION_SEND);
-            i.setType("text/plain");
-            i.setPackage("com.whatsapp");
-            i.putExtra(Intent.EXTRA_TEXT, safeText(outputView));
-            try {
-                startActivity(i);
-            } catch (android.content.ActivityNotFoundException ex) {
-                startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://play.google.com/store/apps/details?id=com.whatsapp")));
-            }
-        });
-
         // Copia testo
         findViewById(R.id.btnCopy).setOnClickListener(v -> {
             String testo = safeText(outputView);

@@ -6,13 +6,38 @@
     android:orientation="vertical"
     android:background="@color/background">
 
-    <ImageView
-        android:id="@+id/verseImageView"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scaleType="fitCenter"
-        android:padding="16dp"/>
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/verseImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:padding="12dp"/>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+        <!-- Messaggio attesa -->
+        <TextView
+            android:id="@+id/tvLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="80dp"
+            android:text="Generazione immagine in corso…"
+            android:textSize="14sp"
+            android:textColor="@color/on_surface_variant"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnShareImage"
