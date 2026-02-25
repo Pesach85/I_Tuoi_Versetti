@@ -38,17 +38,16 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_batch_verse_fetch);
 
-        libroView          = findViewById(R.id.batchLibro);
-        capitoloView       = findViewById(R.id.batchCapitolo);
-        versettoInView     = findViewById(R.id.batchVersettoIn);
-        versettoFinView    = findViewById(R.id.batchVersettoFin);
-        iterazioniView     = findViewById(R.id.batchIterazioni);
-        startBtn           = findViewById(R.id.batchStartBtn);
-        stopBtn            = findViewById(R.id.batchStopBtn);
-        outputView         = findViewById(R.id.batchOutput);
+        libroView      = findViewById(R.id.batchLibro);
+        capitoloView   = findViewById(R.id.batchCapitolo);
+        versettoInView = findViewById(R.id.batchVersettoIn);
+        versettoFinView= findViewById(R.id.batchVersettoFin);
+        iterazioniView = findViewById(R.id.batchIterazioni);
+        startBtn       = findViewById(R.id.batchStartBtn);
+        stopBtn        = findViewById(R.id.batchStopBtn);
+        outputView     = findViewById(R.id.batchOutput);
 
         stopBtn.setEnabled(false);
-
         setupBookSuggestions();
 
         startBtn.setOnClickListener(v -> onStartClicked());
@@ -102,46 +101,6 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
                 android.R.layout.simple_dropdown_item_1line,
                 new Bibbia().composeBibbia());
         libroView.setAdapter(adapter);
-    }
-
-    // -------------------------------------------------------------------------
-    // Autocomplete capitoli
-    // -------------------------------------------------------------------------
-
-    private void setupChapterSuggestions() {
-        WeakReference<BatchVerseFetchActivity> ref = new WeakReference<>(this);
-        executor.execute(() -> {
-            List<String> chapters = new ArrayList<>();
-            String error = null;
-            try {
-                BibleDb db = BibleDb.get(getApplicationContext());
-                androidx.sqlite.db.SupportSQLiteDatabase readableDb =
-                        db.getOpenHelper().getReadableDatabase();
-                try (android.database.Cursor c = readableDb.query(
-                        "SELECT DISTINCT chapter_name FROM verses ORDER BY chapter_name")) {
-                    while (c.moveToNext()) {
-                        String value = c.getString(0);
-                        if (value != null && !value.isBlank()) chapters.add(value);
-                    }
-                }
-            } catch (Exception e) {
-                error = "Errore suggerimenti capitolo: " + e.getMessage();
-            }
-            final List<String> finalChapters = chapters;
-            final String finalError = error;
-            handler.post(() -> {
-                BatchVerseFetchActivity a = ref.get();
-                if (a == null || a.isDestroyed() || a.isFinishing()) return;
-                if (finalError != null) {
-                    a.outputView.setText(finalError);
-                } else {
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                            a,
-                            android.R.layout.simple_dropdown_item_1line,
-                            finalChapters);
-                }
-            });
-        });
     }
 
     // -------------------------------------------------------------------------
@@ -201,7 +160,6 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
                     BatchVerseFetchActivity act = ref.get();
                     if (act == null || act.isDestroyed() || act.isFinishing()) return;
                     act.outputView.append((finalSuccess ? "OK: " : "") + finalResult + "\n\n");
-
                     scheduleIteration(ref, libro, capitoloInizio,
                             vIn, vFin, totalIter, currentIter + 1, capOffset + 1);
                 });
@@ -225,10 +183,7 @@ public class BatchVerseFetchActivity extends AppCompatActivity {
     }
 
     private int parseInt(EditText v) {
-        try {
-            return Integer.parseInt(v.getText().toString().trim());
-        } catch (NumberFormatException e) {
-            return -1;
-        }
+        try { return Integer.parseInt(v.getText().toString().trim()); }
+        catch (NumberFormatException e) { return -1; }
     }
 }
