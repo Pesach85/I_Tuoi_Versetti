@@ -1,53 +1,229 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:fillViewport="true"
+    android:background="@color/background">
 
-    <TextView
-        android:id="@+id/dbInfoView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Info DB"
-        android:textSize="18sp"
-        android:padding="8dp" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <Button
-        android:id="@+id/btnDeleteDb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Cancella DB"
-        android:layout_marginTop="24dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Info DB / output query"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/on_background"
+            android:layout_marginBottom="8dp" />
 
-    <Button
-        android:id="@+id/btnExportDb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Esporta DB"
-        android:layout_marginTop="12dp" />
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:strokeColor="@color/outline"
+            app:strokeWidth="1dp"
+            app:cardUseCompatPadding="true">
 
-    <Button
-        android:id="@+id/btnImportDb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Importa DB"
-        android:layout_marginTop="12dp" />
+            <ScrollView
+                android:id="@+id/dbInfoScroll"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:background="@android:color/transparent"
+                android:scrollbars="vertical"
+                android:fadeScrollbars="false">
 
-    <EditText
-        android:id="@+id/sqlInputView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Query SQL (ALTER, UPDATE, ecc.)"
-        android:inputType="textMultiLine"
-        android:minLines="2"
-        android:layout_marginTop="24dp" />
+                <TextView
+                    android:id="@+id/dbInfoView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="220dp"
+                    android:padding="10dp"
+                    android:text="Info DB"
+                    android:textColor="@color/on_surface"
+                    android:textIsSelectable="true" />
+            </ScrollView>
 
-    <Button
-        android:id="@+id/btnExecSql"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Esegui SQL"
-        android:layout_marginTop="8dp" />
+        </com.google.android.material.card.MaterialCardView>
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Editor rapido riga (libro/capitolo/versetto)"
+            android:textStyle="bold"
+            android:textColor="@color/on_background"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="6dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Libro">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/quickBookView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="Capitolo">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/quickChapterView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="1dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="Versetto">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/quickVerseView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Testo versetto (modifica veloce)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/quickTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences|textMultiLine"
+                android:minLines="3"
+                android:maxLines="8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnQuickLoad"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Carica riga" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnQuickSave"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Salva modifica" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SQL libera + query preimpostate"
+            android:textStyle="bold"
+            android:textColor="@color/on_background"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="6dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Query SQL (ALTER, UPDATE, SELECT, ecc.)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sqlInputView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:maxLines="8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPresetSelect"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Preset SELECT" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPresetUpdate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Preset UPDATE" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExecSql"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Esegui SQL"
+            android:layout_marginTop="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeleteDb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancella DB"
+            android:layout_marginTop="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExportDb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Esporta DB (Download/Documenti)"
+            android:layout_marginTop="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnImportDb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Importa backup più recente"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+</ScrollView>

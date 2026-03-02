@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/studyToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/appbar"
+        app:navigationIcon="@android:drawable/ic_media_previous"
+        app:title="@string/study_assistant_title"
+        app:titleTextColor="@color/on_primary_container" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:padding="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/study_question_hint">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/studyQuestionInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="2"
+                    android:maxLines="4"
+                    android:inputType="textCapSentences|textMultiLine" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchStudyNetworkSources"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:checked="true"
+                android:text="@string/study_network_sources_switch" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/studyPromptChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:chipSpacingHorizontal="6dp"
+                app:chipSpacingVertical="6dp"
+                app:singleSelection="false">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPromptFaith"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fede" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPromptHope"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Speranza" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPromptPrayer"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Preghiera" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPromptFamily"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Famiglia" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPromptPeace"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pace" />
+            </com.google.android.material.chip.ChipGroup>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStudyAnalyze"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/study_analyze_button" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/study_glossary_title"
+                android:textStyle="bold"
+                android:textColor="@color/on_background" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:hint="@string/study_glossary_hint">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/studyGlossaryInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLookupGlossary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/study_glossary_lookup" />
+
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="1dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnInsertGlossary"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/study_glossary_insert" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnWarmGlossaryCache"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/study_glossary_warm_cache" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="14dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/outline"
+                app:cardUseCompatPadding="true">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="170dp"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false">
+
+                    <TextView
+                        android:id="@+id/studyGlossaryView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="170dp"
+                        android:padding="12dp"
+                        android:text="@string/study_glossary_placeholder"
+                        android:textColor="@color/on_surface"
+                        android:textIsSelectable="true" />
+                </ScrollView>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/study_research_guide_title"
+                android:textStyle="bold"
+                android:textColor="@color/on_background" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/study_research_guide_subtitle"
+                android:textSize="12sp"
+                android:textColor="@color/on_surface_variant" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLookupResearchGuide"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/study_research_lookup" />
+
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="1dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnOpenResearchGuide"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/study_research_open_source" />
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="14dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/outline"
+                app:cardUseCompatPadding="true">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="170dp"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false">
+
+                    <TextView
+                        android:id="@+id/studyResearchGuideView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="170dp"
+                        android:padding="12dp"
+                        android:text="@string/study_research_placeholder"
+                        android:textColor="@color/on_surface"
+                        android:textIsSelectable="true" />
+                </ScrollView>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnInsertResearchGuide"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/study_research_insert" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="14dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/outline"
+                app:cardUseCompatPadding="true">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false">
+
+                    <TextView
+                        android:id="@+id/studyAnswerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="220dp"
+                        android:padding="12dp"
+                        android:text="@string/study_answer_placeholder"
+                        android:textColor="@color/on_surface"
+                        android:textIsSelectable="true" />
+                </ScrollView>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/study_path_title"
+                android:textStyle="bold"
+                android:textColor="@color/on_background" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/study_path_subtitle"
+                android:textSize="12sp"
+                android:textColor="@color/on_surface_variant" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/studyDurationToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:checkedButton="@id/btnDuration7"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDuration3"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3g" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDuration7"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="7g" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDuration14"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="14g" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDuration30"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="30g" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGeneratePath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/study_generate_path" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="14dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/outline"
+                app:cardUseCompatPadding="true">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false">
+
+                    <TextView
+                        android:id="@+id/studyPathView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="220dp"
+                        android:padding="12dp"
+                        android:text="@string/study_path_placeholder"
+                        android:textColor="@color/on_surface"
+                        android:textIsSelectable="true" />
+                </ScrollView>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnInsertPath"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/study_insert_path" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/study_notes_title"
+                android:textStyle="bold"
+                android:textColor="@color/on_background" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:hint="@string/study_note_title_hint">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/studyNoteTitleInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:hint="@string/study_note_body_hint">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/studyNoteBodyInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="5"
+                    android:maxLines="12"
+                    android:inputType="textCapSentences|textMultiLine" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnInsertAnswer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/study_insert_answer" />
+
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="1dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSaveNoteLocal"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/study_save_local" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnExportTxt"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/study_export_txt" />
+
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="1dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnExportMd"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/study_export_md" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnShareNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/study_share_note" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

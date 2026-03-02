@@ -62,7 +62,8 @@ public final class WolVerseFetcher {
                     .replaceAll("[\\*+]+", "")
                     .replaceAll("\\s+", " ")
                     .trim();
-                text = stripLeadingVerseNumber(text, v);
+            text = stripLeadingVerseNumber(text, v);
+            text = stripChapterNumberPrefixForVerseOne(text, v);
 
             if (!text.isEmpty()) {
                 VerseEntity e = new VerseEntity();
@@ -97,5 +98,12 @@ public final class WolVerseFetcher {
 
         while (end < n && Character.isWhitespace(text.charAt(end))) end++;
         return text.substring(end).trim();
+    }
+
+    private static String stripChapterNumberPrefixForVerseOne(String text, int verse) {
+        if (text == null) return "";
+        String trimmed = text.trim();
+        if (verse != 1 || trimmed.isEmpty()) return trimmed;
+        return trimmed.replaceFirst("^\\d{1,3}\\s+", "").trim();
     }
 }

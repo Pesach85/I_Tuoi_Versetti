@@ -1,5 +1,18 @@
 apply plugin: 'com.android.application'
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { stream ->
+        keystoreProperties.load(stream)
+    }
+}
+def releaseSigningKeys = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+def hasReleaseSigning = releaseSigningKeys.every { key ->
+    def value = keystoreProperties[key]
+    value != null && value.toString().trim().length() > 0
+}
+
 android {
     namespace 'com.testing.ituoiversetti'
     compileSdkVersion 35
@@ -13,8 +26,22 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -51,6 +78,16 @@ android {
         main {
             java.srcDirs = ['src/main/java']
         }
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    def wantsSignedRelease = graph.allTasks.any { task ->
+        def name = task.name.toLowerCase()
+        (name.contains('assemblerelease') || name.contains('bundlerelease'))
+    }
+    if (wantsSignedRelease && !hasReleaseSigning) {
+        throw new GradleException('Missing signing config for release build. Create keystore.properties from keystore.properties.example')
     }
 }
 

@@ -1,80 +1,458 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Build Debug (safe)",
-      "type": "shell",
-      "command": "cmd",
-      "args": [
-        "/c",
-        "gradlew.bat :app:assembleDebug --no-daemon --stacktrace"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Install Debug (adb)",
-      "type": "shell",
-      "command": "cmd",
-      "args": [
-        "/c",
-        "adb install -r app\\build\\outputs\\apk\\debug\\app-debug.apk"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Build + Install Debug (safe)",
-      "dependsOrder": "sequence",
-      "dependsOn": [
-        "Build Debug (safe)",
-        "Install Debug (adb)"
-      ],
-      "problemMatcher": []
-    },
-    {
-      "label": "Start Emulator Pixel_7",
-      "type": "shell",
-      "command": "cmd",
-      "args": [
-        "/c",
-        "\"D:\\Android\\android-sdk\\emulator\\emulator.exe\" -avd Pixel_7"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}",
-        "env": {
-          "ANDROID_HOME": "D:\\Android\\android-sdk",
-          "ANDROID_SDK_ROOT": "D:\\Android\\android-sdk"
-        }
-      },
-      "isBackground": true,
-      "problemMatcher": []
-    },
-    {
-      "label": "Start Emulator Pixel_7 (cold boot)",
-      "type": "shell",
-      "command": "cmd",
-      "args": [
-        "/c",
-        "\"D:\\Android\\android-sdk\\emulator\\emulator.exe\" -avd Pixel_7 -no-snapshot-load"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}",
-        "env": {
-          "ANDROID_HOME": "D:\\Android\\android-sdk",
-          "ANDROID_SDK_ROOT": "D:\\Android\\android-sdk"
-        }
-      },
-      "isBackground": true,
-      "problemMatcher": []
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Debug (safe)",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"gradlew.bat :app:assembleDebug --no-daemon --stacktrace"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Install Debug (adb)",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"adb install -r app\\build\\outputs\\apk\\debug\\app-debug.apk"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Build + Install Debug (safe)",
+			"dependsOrder": "sequence",
+			"dependsOn": [
+				"Build Debug (safe)",
+				"Install Debug (adb)"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Emulator Pixel_7",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"\"D:\\Android\\android-sdk\\emulator\\emulator.exe\" -avd Pixel_7"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"env": {
+					"ANDROID_HOME": "D:\\Android\\android-sdk",
+					"ANDROID_SDK_ROOT": "D:\\Android\\android-sdk"
+				}
+			},
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Emulator Pixel_7 (cold boot)",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"\"D:\\Android\\android-sdk\\emulator\\emulator.exe\" -avd Pixel_7 -no-snapshot-load"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"env": {
+					"ANDROID_HOME": "D:\\Android\\android-sdk",
+					"ANDROID_SDK_ROOT": "D:\\Android\\android-sdk"
+				}
+			},
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Bundle Release (signed)",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"gradlew.bat :app:bundleRelease --no-daemon --stacktrace"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Bundle Release (jvmargs override)",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"gradlew.bat -Dorg.gradle.jvmargs=-Xmx768m -Dfile.encoding=UTF-8 :app:bundleRelease --no-daemon --stacktrace"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Release Build Script",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\release-build.ps1"
+			]
+		},
+		{
+			"label": "Gradle Version Check",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"gradlew.bat --version --no-daemon"
+			]
+		},
+		{
+			"label": "Fix Gradle Environment",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\fix-gradle.ps1",
+				"-PurgeWrapper",
+				"-PurgeDaemonLogs"
+			]
+		},
+		{
+			"label": "Prepare GitHub Secrets",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\prepare-github-secrets.ps1"
+			]
+		},
+		{
+			"label": "Prepare GitHub Secrets (fixed)",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\prepare-github-secrets.ps1"
+			]
+		},
+		{
+			"label": "Check GH CLI",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"if (Get-Command gh -ErrorAction SilentlyContinue) { gh --version } else { Write-Output GH_NOT_FOUND }"
+			]
+		},
+		{
+			"label": "Install GH CLI (zip)",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$ErrorActionPreference='Stop'; $ProgressPreference='SilentlyContinue'; $repo='https://api.github.com/repos/cli/cli/releases/latest'; $release=Invoke-RestMethod -Uri $repo -Headers @{ 'User-Agent'='PowerShell' }; $asset=$release.assets | Where-Object { $_.name -match 'windows_amd64.zip$' } | Select-Object -First 1; if (-not $asset) { throw 'No windows_amd64.zip asset found' }; $toolsDir=Join-Path $env:USERPROFILE 'tools'; $installRoot=Join-Path $toolsDir 'gh-cli'; New-Item -ItemType Directory -Force -Path $toolsDir | Out-Null; if (Test-Path $installRoot) { Remove-Item -Recurse -Force $installRoot }; New-Item -ItemType Directory -Force -Path $installRoot | Out-Null; $zipPath=Join-Path $toolsDir $asset.name; Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath -UseBasicParsing; Expand-Archive -Path $zipPath -DestinationPath $installRoot -Force; $ghExe = Get-ChildItem -Path $installRoot -Recurse -Filter gh.exe | Select-Object -First 1; if (-not $ghExe) { throw 'gh.exe not found after extraction' }; $ghBin = Split-Path $ghExe.FullName -Parent; $userPath=[Environment]::GetEnvironmentVariable('Path','User'); if ([string]::IsNullOrWhiteSpace($userPath)) { $userPath='' }; $parts=$userPath.Split(';',[System.StringSplitOptions]::RemoveEmptyEntries); if ($parts -notcontains $ghBin) { $newPath = (($parts + $ghBin) -join ';').Trim(';'); [Environment]::SetEnvironmentVariable('Path',$newPath,'User') }; Write-Output ('GH_BIN=' + $ghBin); & $ghExe.FullName --version"
+			]
+		},
+		{
+			"label": "Install GH CLI Script",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\install-gh-cli.ps1"
+			]
+		},
+		{
+			"label": "Verify GH CLI",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$ghExe = Get-ChildItem -Path (Join-Path $env:USERPROFILE 'tools\\gh-cli') -Recurse -Filter gh.exe -ErrorAction SilentlyContinue | Select-Object -First 1; if ($ghExe) { Write-Output ('FOUND=' + $ghExe.FullName); & $ghExe.FullName --version } else { Write-Output GH_EXE_NOT_FOUND }"
+			]
+		},
+		{
+			"label": "GH Auth Status",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"gh auth status --hostname github.com"
+			]
+		},
+		{
+			"label": "Upload GitHub Secrets",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\upload-github-secrets.ps1"
+			]
+		},
+		{
+			"label": "Check Repo Secrets",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\check-github-secrets.ps1"
+			]
+		},
+		{
+			"label": "Trigger Release Workflow",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\trigger-release-workflow.ps1"
+			]
+		},
+		{
+			"label": "GH Login Web",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"gh auth login --hostname github.com --git-protocol https --web --scopes repo,read:org"
+			]
+		},
+		{
+			"label": "GH Auth Check Reliable",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$gh = Get-Command gh -ErrorAction SilentlyContinue; if (-not $gh) { $gh = Get-ChildItem -Path (Join-Path $env:USERPROFILE 'tools\\gh-cli') -Recurse -Filter gh.exe -ErrorAction SilentlyContinue | Select-Object -First 1 }; if (-not $gh) { throw 'gh non trovato' }; & $gh.Source auth status --hostname github.com; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+			]
+		},
+		{
+			"label": "Install GH CLI MSI",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\install-gh-cli-msi.ps1"
+			]
+		},
+		{
+			"label": "Check MSI GH Path",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"if (Test-Path 'C:\\Program Files\\GitHub CLI\\gh.exe') { Write-Output 'GH_MSI_OK'; & 'C:\\Program Files\\GitHub CLI\\gh.exe' --version } elseif (Test-Path (Join-Path $env:LOCALAPPDATA 'Programs\\GitHub CLI\\gh.exe')) { $p = Join-Path $env:LOCALAPPDATA 'Programs\\GitHub CLI\\gh.exe'; Write-Output 'GH_USER_OK'; & $p --version } else { Write-Output 'GH_MSI_NOT_FOUND' }"
+			]
+		},
+		{
+			"label": "Build Debug Verbose",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"gradlew.bat :app:assembleDebug --no-daemon --stacktrace --info"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build Debug Capture Log",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$log='debug_build_full.log'; if (Test-Path $log) { Remove-Item $log -Force }; .\\gradlew.bat :app:assembleDebug --no-daemon --stacktrace --info *>&1 | Tee-Object -FilePath $log; Write-Output ('EXIT=' + $LASTEXITCODE)"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build Debug Scripted",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\build-debug.ps1"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build Debug Scripted After Fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\build-debug.ps1"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build Debug Retry",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\build-debug.ps1"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build Debug No JVMArgs",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"gradlew.bat -Dorg.gradle.jvmargs=\"-Xmx768m -Dfile.encoding=UTF-8\" :app:assembleDebug --no-daemon --stacktrace"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Check JDK Candidates",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$candidates = @('C:\\Program Files\\Android\\Android Studio\\jbr','C:\\Program Files\\Android\\Android Studio\\jre','C:\\Program Files\\Eclipse Adoptium','C:\\Program Files\\Java'); foreach ($p in $candidates) { Write-Output ($p + ' => ' + (Test-Path $p)) }"
+			]
+		},
+		{
+			"label": "Find Alternative JDK",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$candidates=@('C:\\Program Files\\Android\\Android Studio\\jbr','C:\\Program Files\\Android\\Android Studio\\jre','D:\\Android\\Android Studio\\jbr','D:\\Android\\android-studio\\jbr'); $found=$false; foreach($p in $candidates){ if(Test-Path $p){ $found=$true; Write-Output ('FOUND ' + $p); if(Test-Path (Join-Path $p 'bin\\java.exe')){ & (Join-Path $p 'bin\\java.exe') -version } } }; if(-not $found){ Write-Output 'NO_ALT_JDK_FOUND' }"
+			]
+		},
+		{
+			"label": "Build Debug Now",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\build-debug-now.ps1"
+			]
+		},
+		{
+			"label": "Check Debug APK Timestamp",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$p='app\\build\\outputs\\apk\\debug\\app-debug.apk'; if(Test-Path $p){ Get-Item $p | Select-Object FullName,Length,LastWriteTime | Format-Table -AutoSize } else { Write-Output 'APK_NOT_FOUND' }"
+			]
+		},
+		{
+			"label": "Build Debug Now (Logged)",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\build-debug-now.ps1"
+			]
+		},
+		{
+			"label": "Build Debug Script Logged",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\tools\\build-debug-now.ps1"
+			]
+		},
+		{
+			"label": "Build Debug to Log",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"gradlew.bat :app:assembleDebug --no-daemon --stacktrace > app\\build\\outputs\\logs\\debug-latest.log 2>&1"
+			]
+		},
+		{
+			"label": "Check APK Freshness Now",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$p='app\\build\\outputs\\apk\\debug\\app-debug.apk'; if(Test-Path $p){ Get-Item $p | Select-Object FullName,Length,LastWriteTime | Format-List } else { Write-Output 'APK_NOT_FOUND' }"
+			]
+		},
+		{
+			"label": "Dir APK Timestamp",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"dir /T:W app\\build\\outputs\\apk\\debug\\app-debug.apk"
+			]
+		}
+	]
 }

@@ -10,4 +10,8 @@
         android:title="Gestione DB"
         android:orderInCategory="101"
         app:showAsAction="never"/>
+    <item android:id="@+id/action_study_assistant"
+        android:title="@string/menu_study_assistant"
+        android:orderInCategory="102"
+        app:showAsAction="never"/>
 </menu>

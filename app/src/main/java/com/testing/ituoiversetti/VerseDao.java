@@ -15,6 +15,14 @@ public interface VerseDao {
             "ORDER BY verse")
     List<VerseRow> getRange(List<String> bookKeys, int chapter, int fromV, int toV);
 
+        @Query("SELECT bookKey, chapter, verse, text FROM verses " +
+            "WHERE bookKey IN (:bookKeys) AND chapter=:chapter AND verse=:verse " +
+            "ORDER BY bookKey LIMIT 1")
+        VerseEntity findOne(List<String> bookKeys, int chapter, int verse);
+
+        @Query("UPDATE verses SET text=:text WHERE bookKey=:bookKey AND chapter=:chapter AND verse=:verse")
+        int updateVerseText(String bookKey, int chapter, int verse, String text);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void upsertAll(List<VerseEntity> rows);
 

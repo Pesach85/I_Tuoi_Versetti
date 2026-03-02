@@ -4,12 +4,18 @@ import android.content.Intent;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.GridView;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.core.content.ContextCompat;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +41,10 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.textfield.TextInputLayout;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,10 +56,12 @@ public class MainActivity extends AppCompatActivity {
     // -------------------------------------------------------------------------
     private static final String PREFS_DB_FIX = "db_fixes";
     private static final String KEY_VERSE_PREFIX_FIX_DONE = "verse_prefix_fix_done";
+    private static final String KEY_VERSE_ONE_CHAPTER_PREFIX_FIX_DONE = "verse_one_chapter_prefix_fix_done";
     private static final int SANITIZE_PAGE_SIZE = 500;
     private static final int TOPIC_RESULTS_LIMIT = 25;
     private static final int TOPIC_CANDIDATE_LIMIT = 220;
     private static final int TOPIC_MAX_SEMANTIC_TERMS = 10;
+    private static final Pattern CHAPTER_PREFIX_FOR_VERSE_ONE = Pattern.compile("^\\s*\\d{1,3}\\s+");
 
     // -------------------------------------------------------------------------
     // UI
@@ -57,11 +69,16 @@ public class MainActivity extends AppCompatActivity {
     private AutoCompleteTextView bookView;
     private AutoCompleteTextView topicView;
     private SwitchCompat semanticSwitch;
+    private SwitchCompat onlineSwitch;
     private AutoCompleteTextView chapterView;
     private AutoCompleteTextView verseFromView;
     private AutoCompleteTextView verseToView;
+    private TextInputLayout verseToLayout;
     private MultiAutoCompleteTextView outputView;
     private ArrayAdapter<String> arrayAdapter;
+    private MaterialButtonToggleGroup verseModeToggle;
+    private ChipGroup chipVerseStartGroup;
+    private ChipGroup chipVerseRangeGroup;
 
     // -------------------------------------------------------------------------
     // Logic
@@ -69,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final InputCheck ok = new InputCheck();
     private volatile boolean userSearchInProgress = false;
+    private PopupWindow activeSuggestionPopup;
+    private List<String> allBooks = new ArrayList<>();
 
     // -------------------------------------------------------------------------
     // Connettività
@@ -111,20 +130,30 @@ public class MainActivity extends AppCompatActivity {
         bookView       = findViewById(R.id.autoCompleteTextView);
         topicView      = findViewById(R.id.autoCompleteTextViewTopic);
         semanticSwitch = findViewById(R.id.switchSemanticSearch);
+        onlineSwitch   = findViewById(R.id.switchOnlineMode);
         chapterView    = findViewById(R.id.autoCompleteTextView2);
         verseFromView  = findViewById(R.id.autoCompleteTextView3);
         verseToView    = findViewById(R.id.autoCompleteTextView4);
+        verseToLayout  = findViewById(R.id.verseToLayout);
+        verseModeToggle = findViewById(R.id.verseModeToggle);
+        chipVerseStartGroup = findViewById(R.id.chipVerseStartGroup);
+        chipVerseRangeGroup = findViewById(R.id.chipVerseRangeGroup);
         outputView     = findViewById(R.id.multiAutoCompleteTextView);
 
+        allBooks = new Bibbia().composeBibbia();
         arrayAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line,
-                new Bibbia().composeBibbia());
+            allBooks);
         bookView.setAdapter(arrayAdapter);
+        setupBookGridSuggestions();
+        setupChapterGridSuggestions();
+        setupVerseInputAssistant();
 
         Button searchBtn   = findViewById(R.id.button);
 
         executor.execute(() -> {
             sanitizeVersePrefixOnce();
+            sanitizeVerseOneChapterPrefixOnce();
             long c = BibleDb.get(getApplicationContext()).verseDao().countAll();
             if (c == 0) {
                 ensureIndexWorkEnqueued();
@@ -160,6 +189,8 @@ public class MainActivity extends AppCompatActivity {
             Integer cap  = parseIntOrNull(chapterView);
             Integer vIn  = parseIntOrNull(verseFromView);
             Integer vFin = parseIntOrNull(verseToView);
+                boolean singleVerseMode = verseModeToggle != null
+                    && verseModeToggle.getCheckedButtonId() == R.id.btnVerseModeSingle;
 
             boolean hasTopic    = !topicInput.isEmpty();
             boolean hasRefInput = !libroInput.isEmpty() || cap != null
@@ -237,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             int versettoIn  = vIn;
-            int versettoFin = (vFin == null) ? vIn : vFin;
+            int versettoFin = singleVerseMode ? vIn : ((vFin == null) ? vIn : vFin);
             if (versettoFin < versettoIn) versettoFin = versettoIn;
 
             try { new NumCapitoli().selectCapN(libro); } catch (IOException ignored) {}
@@ -250,11 +281,12 @@ public class MainActivity extends AppCompatActivity {
             final int    fCap     = capitolo;
             final int    fVIn     = versettoIn;
             final int    fVFin    = versettoFin;
+            final boolean allowOnlineFetch = onlineSwitch == null || onlineSwitch.isChecked();
 
             executor.execute(() -> {
                 String result;
                 try {
-                    result = searchDbThenWebAndCache(fLibro, fCap, fVIn, fVFin);
+                    result = searchDbThenWebAndCache(fLibro, fCap, fVIn, fVFin, allowOnlineFetch);
                 } catch (Exception e) {
                     result = "Errore ricerca";
                 }
@@ -311,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (activeSuggestionPopup != null) activeSuggestionPopup.dismiss();
         executor.shutdownNow();
     }
 
@@ -322,11 +355,14 @@ public class MainActivity extends AppCompatActivity {
      * Istanza — usata da MainActivity.
      * Jsoup ha precedenza: fetch sempre se online, upsert solo se il testo è diverso o mancante.
      */
-    private String searchDbThenWebAndCache(String libro, int capitolo, int vIn, int vFin) {
+    private String searchDbThenWebAndCache(String libro, int capitolo, int vIn, int vFin,
+                                           boolean allowOnlineFetch) {
         BibleDb db = BibleDb.get(getApplicationContext());
         List<String> keys = BookNameUtil.candidateKeys(libro);
+        boolean connected = isConnected();
+        boolean canUseOnline = allowOnlineFetch && connected;
 
-        if (isConnected()) {
+        if (canUseOnline) {
             // Check preventivo: se tutti i versetti esistono nel DB, salta la rete
             List<VerseRow> existing = db.verseDao().getRange(keys, capitolo, vIn, vFin);
             int expectedCount = vFin - vIn + 1;
@@ -342,7 +378,8 @@ public class MainActivity extends AppCompatActivity {
 
         List<VerseRow> rows = db.verseDao().getRange(keys, capitolo, vIn, vFin);
         if (rows != null && !rows.isEmpty()) return join(rows);
-        return isConnected() ? "Non trovato (online)" : "Non trovato nel DB (offline)";
+        if (!allowOnlineFetch) return "Non trovato nel DB (offline forzato)";
+        return connected ? "Non trovato (online)" : "Non trovato nel DB (offline)";
     }
 
     /**
@@ -376,7 +413,8 @@ public class MainActivity extends AppCompatActivity {
 
             List<VerseEntity> toUpsert = new ArrayList<>();
             for (VerseEntity incoming : fetched) {
-                String incomingText = incoming.text == null ? "" : incoming.text.trim();
+                String incomingText = normalizeIncomingVerseText(incoming.text, incoming.verse);
+                incoming.text = incomingText;
 
                 List<VerseRow> existing = db.verseDao()
                         .getRange(keys, capitolo, incoming.verse, incoming.verse);
@@ -407,7 +445,8 @@ public class MainActivity extends AppCompatActivity {
 
             List<VerseEntity> toUpsert = new ArrayList<>();
             for (VerseEntity incoming : fetched) {
-                String incomingText = incoming.text == null ? "" : incoming.text.trim();
+                String incomingText = normalizeIncomingVerseText(incoming.text, incoming.verse);
+                incoming.text = incomingText;
 
                 List<VerseRow> existing = db.verseDao()
                         .getRange(keys, capitolo, incoming.verse, incoming.verse);
@@ -433,7 +472,7 @@ public class MainActivity extends AppCompatActivity {
     private static String join(List<VerseRow> rows) {
         StringBuilder sb = new StringBuilder();
         for (VerseRow r : rows) {
-            String text = r.text == null ? "" : r.text.trim();
+            String text = normalizeIncomingVerseText(r.text, r.verse);
             if (startsWithVersePrefix(text, r.verse)) sb.append(text).append(" ");
             else sb.append(r.verse).append(" ").append(text).append(" ");
         }
@@ -443,7 +482,7 @@ public class MainActivity extends AppCompatActivity {
     private static String joinStatic(List<VerseRow> rows) {
         StringBuilder sb = new StringBuilder();
         for (VerseRow r : rows) {
-            String text = r.text == null ? "" : r.text.trim();
+            String text = normalizeIncomingVerseText(r.text, r.verse);
             if (startsWithVersePrefix(text, r.verse)) sb.append(text).append(" ");
             else sb.append(r.verse).append(" ").append(text).append(" ");
         }
@@ -755,7 +794,7 @@ public class MainActivity extends AppCompatActivity {
                 boolean changed = false;
                 for (VerseEntity row : page) {
                     if (row == null || row.text == null) continue;
-                    String cleaned = stripLeadingVerseNumber(row.text, row.verse);
+                    String cleaned = normalizeIncomingVerseText(row.text, row.verse);
                     if (!cleaned.equals(row.text)) { row.text = cleaned; changed = true; }
                 }
                 if (changed) dao.upsertAll(page);
@@ -764,6 +803,43 @@ public class MainActivity extends AppCompatActivity {
             }
             sp.edit().putBoolean(KEY_VERSE_PREFIX_FIX_DONE, true).apply();
         } catch (Exception ignored) {}
+    }
+
+    private void sanitizeVerseOneChapterPrefixOnce() {
+        android.content.SharedPreferences sp =
+                getSharedPreferences(PREFS_DB_FIX, Context.MODE_PRIVATE);
+        if (sp.getBoolean(KEY_VERSE_ONE_CHAPTER_PREFIX_FIX_DONE, false)) return;
+        try {
+            BibleDb db = BibleDb.get(getApplicationContext());
+            VerseDao dao = db.verseDao();
+            int offset = 0;
+            while (true) {
+                List<VerseEntity> page = dao.pageAll(SANITIZE_PAGE_SIZE, offset);
+                if (page == null || page.isEmpty()) break;
+                boolean changed = false;
+                for (VerseEntity row : page) {
+                    if (row == null || row.text == null || row.verse != 1) continue;
+                    String cleaned = stripChapterNumberPrefixForVerseOne(row.text, row.verse);
+                    if (!cleaned.equals(row.text)) { row.text = cleaned; changed = true; }
+                }
+                if (changed) dao.upsertAll(page);
+                if (page.size() < SANITIZE_PAGE_SIZE) break;
+                offset += page.size();
+            }
+            sp.edit().putBoolean(KEY_VERSE_ONE_CHAPTER_PREFIX_FIX_DONE, true).apply();
+        } catch (Exception ignored) {}
+    }
+
+    private static String normalizeIncomingVerseText(String text, int verse) {
+        String cleaned = stripLeadingVerseNumber(text, verse);
+        return stripChapterNumberPrefixForVerseOne(cleaned, verse);
+    }
+
+    private static String stripChapterNumberPrefixForVerseOne(String text, int verse) {
+        if (text == null) return "";
+        String trimmed = text.trim();
+        if (verse != 1 || trimmed.isEmpty()) return trimmed;
+        return CHAPTER_PREFIX_FOR_VERSE_ONE.matcher(trimmed).replaceFirst("").trim();
     }
 
     private static String stripLeadingVerseNumber(String text, int verse) {
@@ -788,6 +864,192 @@ public class MainActivity extends AppCompatActivity {
         if (end > n || !text.regionMatches(idx, verseStr, 0, verseStr.length())) return false;
         if (end == n) return true;
         return Character.isWhitespace(text.charAt(end));
+    }
+
+    // -------------------------------------------------------------------------
+    // Grid suggestions
+    // -------------------------------------------------------------------------
+
+    private void setupBookGridSuggestions() {
+        View.OnClickListener showBooks = v -> showGridPopup(
+                bookView,
+                allBooks,
+                4,
+                picked -> {
+                    bookView.setText(picked, false);
+                    chapterView.setText("");
+                });
+
+        bookView.setOnClickListener(showBooks);
+        bookView.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && safeText(bookView).isEmpty()) showBooks.onClick(bookView);
+        });
+        bookView.setOnItemClickListener((parent, view, position, id) -> chapterView.setText(""));
+    }
+
+    private void setupChapterGridSuggestions() {
+        View.OnClickListener showChapters = v -> {
+            String bookInput = safeText(bookView);
+            if (bookInput.isEmpty()) {
+                toast("Seleziona prima un libro");
+                bookView.requestFocus();
+                return;
+            }
+            List<String> chapters = buildChaptersForBook(bookInput);
+            if (chapters.isEmpty()) {
+                toast("Capitoli non disponibili per il libro selezionato");
+                return;
+            }
+            showGridPopup(chapterView, chapters, 8, picked -> chapterView.setText(picked, false));
+        };
+
+        chapterView.setOnClickListener(showChapters);
+        chapterView.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && safeText(chapterView).isEmpty()) showChapters.onClick(chapterView);
+        });
+    }
+
+    private void setupVerseInputAssistant() {
+        if (verseModeToggle != null) {
+            verseModeToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+                if (!isChecked) return;
+                boolean single = checkedId == R.id.btnVerseModeSingle;
+                if (verseToLayout != null) verseToLayout.setVisibility(single ? View.GONE : View.VISIBLE);
+                if (single) verseToView.setText("");
+            });
+            boolean single = verseModeToggle.getCheckedButtonId() == R.id.btnVerseModeSingle;
+            if (verseToLayout != null) verseToLayout.setVisibility(single ? View.GONE : View.VISIBLE);
+        }
+
+        if (chipVerseStartGroup != null) {
+            wireVerseStartChip(R.id.chipStart1, 1);
+            wireVerseStartChip(R.id.chipStart5, 5);
+            wireVerseStartChip(R.id.chipStart10, 10);
+            wireVerseStartChip(R.id.chipStart20, 20);
+            wireVerseStartChip(R.id.chipStart30, 30);
+        }
+
+        if (chipVerseRangeGroup != null) {
+            wireVerseRangeChip(R.id.chipRange0, 0);
+            wireVerseRangeChip(R.id.chipRange4, 4);
+            wireVerseRangeChip(R.id.chipRange9, 9);
+            wireVerseRangeChip(R.id.chipRange19, 19);
+        }
+    }
+
+    private void wireVerseStartChip(int chipId, int value) {
+        Chip chip = findViewById(chipId);
+        if (chip == null) return;
+        chip.setOnClickListener(v -> {
+            verseFromView.setText(String.valueOf(value), false);
+            if (verseModeToggle != null
+                    && verseModeToggle.getCheckedButtonId() == R.id.btnVerseModeSingle) {
+                verseToView.setText("");
+            }
+        });
+    }
+
+    private void wireVerseRangeChip(int chipId, int delta) {
+        Chip chip = findViewById(chipId);
+        if (chip == null) return;
+        chip.setOnClickListener(v -> {
+            Integer start = parseIntOrNull(verseFromView);
+            if (start == null) {
+                toast("Inserisci prima il versetto iniziale");
+                verseFromView.requestFocus();
+                return;
+            }
+            if (delta > 0 && verseModeToggle != null) {
+                verseModeToggle.check(R.id.btnVerseModeRange);
+            }
+            int end = Math.max(start, start + delta);
+            if (delta == 0 && verseModeToggle != null
+                    && verseModeToggle.getCheckedButtonId() == R.id.btnVerseModeSingle) {
+                verseToView.setText("");
+            } else {
+                verseToView.setText(String.valueOf(end), false);
+            }
+        });
+    }
+
+    private List<String> buildChaptersForBook(String bookInput) {
+        try {
+            String normalizedBook = ok.setTitoloCorrected(bookInput);
+            if (normalizedBook == null || normalizedBook.trim().isEmpty()) return Collections.emptyList();
+            NumCapitoli cap = new NumCapitoli();
+            cap.selectCapN(normalizedBook);
+            return new ArrayList<>(cap.caps);
+        } catch (Exception ignored) {
+            return Collections.emptyList();
+        }
+    }
+
+    private void showGridPopup(AutoCompleteTextView anchor,
+                               List<String> items,
+                               int columns,
+                               SuggestionPicker picker) {
+        if (anchor == null || items == null || items.isEmpty()) return;
+        if (activeSuggestionPopup != null && activeSuggestionPopup.isShowing()) {
+            activeSuggestionPopup.dismiss();
+        }
+
+        GridView grid = new GridView(this);
+        grid.setNumColumns(columns);
+        grid.setHorizontalSpacing(dp(8));
+        grid.setVerticalSpacing(dp(8));
+        grid.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+        grid.setPadding(dp(8), dp(8), dp(8), dp(8));
+        grid.setClipToPadding(false);
+        grid.setAdapter(new SuggestionGridAdapter(items));
+        grid.setOnItemClickListener((AdapterView<?> parent, View view, int position, long id) -> {
+            picker.onPick(items.get(position));
+            if (activeSuggestionPopup != null) activeSuggestionPopup.dismiss();
+        });
+
+        int popupWidth = Math.max(anchor.getWidth(), dp(280));
+        int popupHeight = columns >= 8 ? dp(280) : dp(340);
+        PopupWindow popup = new PopupWindow(grid, popupWidth, popupHeight, true);
+        popup.setOutsideTouchable(true);
+        popup.setElevation(dp(6));
+        popup.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.bg_suggestion_popup));
+
+        activeSuggestionPopup = popup;
+        popup.showAsDropDown(anchor, 0, dp(6));
+    }
+
+    private int dp(int value) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(value * density);
+    }
+
+    private interface SuggestionPicker {
+        void onPick(String value);
+    }
+
+    private final class SuggestionGridAdapter extends ArrayAdapter<String> {
+        SuggestionGridAdapter(List<String> values) {
+            super(MainActivity.this, 0, values);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView tv;
+            if (convertView instanceof TextView) {
+                tv = (TextView) convertView;
+            } else {
+                tv = new TextView(MainActivity.this);
+                int pH = dp(12);
+                int pV = dp(10);
+                tv.setPadding(pH, pV, pH, pV);
+                tv.setBackgroundResource(R.drawable.bg_suggestion_tile);
+                tv.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.on_surface));
+                tv.setTextSize(16f);
+                tv.setGravity(android.view.Gravity.CENTER);
+            }
+            String value = getItem(position);
+            tv.setText(value == null ? "" : value);
+            return tv;
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -835,6 +1097,10 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.action_db_manager) {
             try { startActivity(new Intent(this, DbManagerActivity.class)); }
             catch (Exception e) { toast("Gestione DB non disponibile"); }
+            return true;
+        } else if (id == R.id.action_study_assistant) {
+            try { startActivity(new Intent(this, StudyAssistantActivity.class)); }
+            catch (Exception e) { toast("Assistente studio non disponibile"); }
             return true;
         }
         return super.onOptionsItemSelected(item);

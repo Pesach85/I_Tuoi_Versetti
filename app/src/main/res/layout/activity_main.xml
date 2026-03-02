@@ -76,6 +76,14 @@
                 android:checked="true"
                 android:text="@string/ricerca_ai_semantica"/>
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchOnlineMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/field_spacing"
+                android:checked="true"
+                android:text="@string/usa_rete_per_ricerca"/>
+
             <!-- Libro -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -133,6 +141,7 @@
 
             <!-- Versetto finale -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/verseToLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/field_spacing"
@@ -148,6 +157,154 @@
                     android:inputType="number"
                     android:imeOptions="actionDone"/>
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/field_spacing"
+                app:cardCornerRadius="12dp"
+                app:strokeColor="@color/outline"
+                app:strokeWidth="1dp"
+                app:cardUseCompatPadding="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/assistente_versetti"
+                        android:textStyle="bold"
+                        android:textColor="@color/on_surface" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/verseModeToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:singleSelection="true"
+                        app:checkedButton="@id/btnVerseModeRange">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnVerseModeSingle"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/modalita_versetto_singolo" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnVerseModeRange"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/modalita_intervallo" />
+
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/inizio_rapido"
+                        android:textSize="12sp"
+                        android:textColor="@color/on_surface_variant" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipVerseStartGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        app:singleSelection="false"
+                        app:chipSpacingHorizontal="6dp"
+                        app:chipSpacingVertical="6dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipStart1"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipStart5"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="5" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipStart10"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="10" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipStart20"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="20" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipStart30"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="30" />
+                    </com.google.android.material.chip.ChipGroup>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/ampiezza_intervallo"
+                        android:textSize="12sp"
+                        android:textColor="@color/on_surface_variant" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipVerseRangeGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        app:singleSelection="false"
+                        app:chipSpacingHorizontal="6dp"
+                        app:chipSpacingVertical="6dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipRange0"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+0" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipRange4"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+4" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipRange9"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+9" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipRange19"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+19" />
+                    </com.google.android.material.chip.ChipGroup>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button"

@@ -43,6 +43,11 @@
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             android:exported="false" />
 
+        <activity
+            android:name=".StudyAssistantActivity"
+            android:label="Assistente Studio"
+            android:exported="false" />
+
         <!-- Aggiunta -->
         <activity
             android:name=".VerseImageActivity"
