@@ -47,13 +47,12 @@
                 android:layout_marginBottom="12dp"
                 android:text="@string/settings_auto_parse_pdf_on_startup" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/openBatchBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:text="Batch Versetti" />
-                android:textSize="14sp"
-                android:layout_marginBottom="12dp"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

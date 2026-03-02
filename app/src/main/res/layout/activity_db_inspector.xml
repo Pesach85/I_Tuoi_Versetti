@@ -1,26 +1,40 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="@dimen/content_padding"
+    android:background="@color/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRefresh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Refresh DB dump"/>
 
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="12dp"
+        app:cardUseCompatPadding="true"
+        app:strokeColor="@color/outline"
+        app:strokeWidth="1dp">
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="12dp">
+        android:fadeScrollbars="false"
+        android:scrollbars="vertical">
 
         <TextView
             android:id="@+id/dbText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textColor="@color/on_surface"
             android:textIsSelectable="true"
             android:typeface="monospace"
             android:textSize="12sp"/>
     </ScrollView>
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

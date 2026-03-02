@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitCenter"
-            android:padding="12dp"/>
+            android:padding="16dp"/>
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="80dp"
+            android:layout_marginTop="72dp"
             android:text="Generazione immagine in corso…"
             android:textSize="14sp"
             android:textColor="@color/on_surface_variant"
@@ -43,7 +43,7 @@
         android:id="@+id/btnShareImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/content_padding"
         android:text="Condividi immagine"
         app:icon="@drawable/ic_share"/>
 

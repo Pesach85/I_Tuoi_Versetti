@@ -41,7 +41,7 @@
                     android:inputType="textCapSentences|textMultiLine" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchStudyNetworkSources"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -68,7 +68,7 @@
                     android:imeOptions="actionNext"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchSemanticSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
                 android:checked="true"
                 android:text="@string/ricerca_ai_semantica"/>
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchOnlineMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
