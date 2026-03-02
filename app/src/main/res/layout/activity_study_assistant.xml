@@ -6,14 +6,19 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/studyToolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/appbar"
-        app:navigationIcon="@android:drawable/ic_media_previous"
-        app:title="@string/study_assistant_title"
-        app:titleTextColor="@color/on_primary_container" />
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/studyToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/appbar"
+            app:navigationIcon="@android:drawable/ic_media_previous"
+            app:title="@string/study_assistant_title"
+            app:titleTextColor="@color/on_primary_container" />
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

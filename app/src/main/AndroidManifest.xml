@@ -34,6 +34,12 @@
             android:exported="false" />
 
         <activity
+            android:name=".StudyAssistantActivity"
+            android:label="Assistente Studio"
+            android:theme="@style/AppTheme"
+            android:exported="false" />
+
+        <activity
             android:name=".DbInspectorActivity"
             android:exported="false" />
 
