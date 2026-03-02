@@ -26,7 +26,7 @@
         <activity
             android:name=".BatchVerseFetchActivity"
             android:label="Batch Versetti"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:theme="@style/AppTheme"
             android:exported="false" />
 
         <activity

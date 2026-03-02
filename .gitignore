@@ -16,3 +16,4 @@
 *.jks
 *.keystore
 /github-secrets.local.txt
+*.log

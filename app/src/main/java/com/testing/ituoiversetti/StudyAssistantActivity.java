@@ -14,7 +14,6 @@ import android.text.TextUtils;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.widget.SwitchCompat;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,6 +21,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -73,7 +73,7 @@ public class StudyAssistantActivity extends AppCompatActivity {
     private EditText noteTitleInput;
     private EditText noteBodyInput;
     private MaterialButtonToggleGroup durationToggle;
-    private SwitchCompat networkSourcesSwitch;
+    private SwitchMaterial networkSourcesSwitch;
     private boolean allowNetworkSources = true;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();

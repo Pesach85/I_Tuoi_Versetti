@@ -17,8 +17,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.core.content.ContextCompat;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
@@ -43,8 +41,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputLayout;
 
 import android.view.Menu;
@@ -71,8 +71,8 @@ public class MainActivity extends AppCompatActivity {
     // -------------------------------------------------------------------------
     private AutoCompleteTextView bookView;
     private AutoCompleteTextView topicView;
-    private SwitchCompat semanticSwitch;
-    private SwitchCompat onlineSwitch;
+    private SwitchMaterial semanticSwitch;
+    private SwitchMaterial onlineSwitch;
     private AutoCompleteTextView chapterView;
     private AutoCompleteTextView verseFromView;
     private AutoCompleteTextView verseToView;
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar tb = findViewById(R.id.toolbar);
+        MaterialToolbar tb = findViewById(R.id.toolbar);
         if (tb != null) setSupportActionBar(tb);
         if (getSupportActionBar() != null)
             getSupportActionBar().setTitle("I Tuoi Versetti");
