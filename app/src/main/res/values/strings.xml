@@ -78,6 +78,7 @@
     <string name="study_saved_local">Nota salvata localmente</string>
     <string name="study_export_ok">Esportazione completata</string>
     <string name="settings_intro">Strumenti diagnostici per verificare rete, database locale e indicizzazione offline.</string>
+    <string name="settings_auto_parse_pdf_on_startup">Parsing PDF automatico all\'avvio</string>
     <string name="debug_status_title">Stato applicazione</string>
     <string name="aggiorna_stato">Aggiorna stato</string>
     <string name="avvia_reindicizzazione">Avvia reindicizzazione offline</string>
@@ -91,6 +92,8 @@
     <string name="share_not_available">Nessuna app disponibile per la condivisione</string>
     <string name="online">Online</string>
     <string name="offline">Offline</string>
+    <string name="attivo">Attivo</string>
+    <string name="disattivo">Disattivo</string>
     <string name="nessuno">Nessuno</string>
     <string name="mai">Mai</string>
     <string name="nessun_job">Nessun job</string>
@@ -103,6 +106,7 @@
     <string name="ultimo_errore">Ultimo errore indicizzazione: %1$s</string>
     <string name="pdf_ultimo_check">Ultimo controllo aggiornamento PDF: %1$s</string>
     <string name="pdf_ultimo_errore">Ultimo errore aggiornamento PDF: %1$s</string>
+    <string name="pdf_auto_parse_on_startup">Auto parsing PDF all\'avvio: %1$s</string>
     <string name="ricerca_argomento_in_corso">Ricerca per argomento in corso...</string>
     <string name="argomento_e_riferimento_conflitto">Usa argomento oppure riferimento, non entrambi</string>
     <string name="argomento_non_trovato">Nessun versetto trovato per l\'argomento richiesto</string>

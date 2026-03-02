@@ -40,12 +40,7 @@
         <activity
             android:name=".DbManagerActivity"
             android:label="Gestione DB"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-            android:exported="false" />
-
-        <activity
-            android:name=".StudyAssistantActivity"
-            android:label="Assistente Studio"
+            android:theme="@style/AppTheme"
             android:exported="false" />
 
         <!-- Aggiunta -->

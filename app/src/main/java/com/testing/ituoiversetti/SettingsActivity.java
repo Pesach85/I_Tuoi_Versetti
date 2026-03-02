@@ -17,6 +17,7 @@ import androidx.work.WorkManager;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -33,6 +34,7 @@ public class SettingsActivity extends AppCompatActivity {
     private static final String PREFS_PDF = "pdf_update_meta";
     private static final String KEY_PDF_LAST_CHECK_MS = "last_check_ms";
     private static final String KEY_PDF_LAST_ERROR = "last_error";
+    private static final String KEY_AUTO_PARSE_ON_STARTUP = "auto_parse_on_startup";
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -70,6 +72,16 @@ public class SettingsActivity extends AppCompatActivity {
         MaterialButton btnOpenDbInspector = findViewById(R.id.btnOpenDbInspector);
         MaterialButton btnCopyDiagnosticReport = findViewById(R.id.btnCopyDiagnosticReport);
         MaterialButton btnShareDiagnosticReport = findViewById(R.id.btnShareDiagnosticReport);
+        SwitchMaterial switchAutoParseOnStartup = findViewById(R.id.switchAutoParseOnStartup);
+
+        if (switchAutoParseOnStartup != null) {
+            SharedPreferences spPdf = getSharedPreferences(PREFS_PDF, Context.MODE_PRIVATE);
+            boolean enabled = spPdf.getBoolean(KEY_AUTO_PARSE_ON_STARTUP, true);
+            switchAutoParseOnStartup.setChecked(enabled);
+            switchAutoParseOnStartup.setOnCheckedChangeListener((buttonView, isChecked) ->
+                spPdf.edit().putBoolean(KEY_AUTO_PARSE_ON_STARTUP, isChecked).apply()
+            );
+        }
 
         // Optional: open batch fetch screen (se presente nel layout)
         MaterialButton batchBtn = findViewById(R.id.openBatchBtn);
@@ -154,6 +166,7 @@ public class SettingsActivity extends AppCompatActivity {
         String lastError;
         String pdfLastCheck;
         String pdfLastError;
+        String pdfAutoParseStatus;
 
         try {
             long count = BibleDb.get(getApplicationContext()).verseDao().countAll();
@@ -212,6 +225,7 @@ public class SettingsActivity extends AppCompatActivity {
             SharedPreferences spPdf = getSharedPreferences(PREFS_PDF, Context.MODE_PRIVATE);
             long lastCheck = spPdf.getLong(KEY_PDF_LAST_CHECK_MS, 0L);
             String lastErr = spPdf.getString(KEY_PDF_LAST_ERROR, "");
+            boolean autoParseEnabled = spPdf.getBoolean(KEY_AUTO_PARSE_ON_STARTUP, true);
 
             if (lastCheck > 0L) {
                 String when = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
@@ -226,9 +240,17 @@ public class SettingsActivity extends AppCompatActivity {
             } else {
                 pdfLastError = getString(R.string.pdf_ultimo_errore, lastErr);
             }
+
+            pdfAutoParseStatus = getString(
+                    R.string.pdf_auto_parse_on_startup,
+                    autoParseEnabled
+                            ? getString(R.string.attivo)
+                            : getString(R.string.disattivo)
+            );
         } catch (Exception e) {
             pdfLastCheck = getString(R.string.pdf_ultimo_check, getString(R.string.errore_lettura));
             pdfLastError = getString(R.string.pdf_ultimo_errore, getString(R.string.errore_lettura));
+            pdfAutoParseStatus = getString(R.string.pdf_auto_parse_on_startup, getString(R.string.errore_lettura));
         }
 
         String generatedAt = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
@@ -241,6 +263,7 @@ public class SettingsActivity extends AppCompatActivity {
                 + indexText + "\n"
                 + lastSync + "\n"
                 + lastError + "\n"
+                + pdfAutoParseStatus + "\n"
                 + pdfLastCheck + "\n"
                 + pdfLastError;
     }

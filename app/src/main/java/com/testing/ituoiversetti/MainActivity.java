@@ -2,6 +2,7 @@ package com.testing.ituoiversetti;
 
 import android.content.Intent;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS_DB_FIX = "db_fixes";
     private static final String KEY_VERSE_PREFIX_FIX_DONE = "verse_prefix_fix_done";
     private static final String KEY_VERSE_ONE_CHAPTER_PREFIX_FIX_DONE = "verse_one_chapter_prefix_fix_done";
+    private static final String PREFS_PDF = "pdf_update_meta";
+    private static final String KEY_AUTO_PARSE_ON_STARTUP = "auto_parse_on_startup";
     private static final int SANITIZE_PAGE_SIZE = 500;
     private static final int TOPIC_RESULTS_LIMIT = 25;
     private static final int TOPIC_CANDIDATE_LIMIT = 220;
@@ -156,8 +159,14 @@ public class MainActivity extends AppCompatActivity {
             sanitizeVerseOneChapterPrefixOnce();
             long c = BibleDb.get(getApplicationContext()).verseDao().countAll();
             if (c == 0) {
-                ensureIndexWorkEnqueued();
-                runOnUiThread(() -> outputView.setText("Offline: indicizzazione in corso..."));
+                SharedPreferences spPdf = getSharedPreferences(PREFS_PDF, MODE_PRIVATE);
+                boolean autoParseEnabled = spPdf.getBoolean(KEY_AUTO_PARSE_ON_STARTUP, true);
+                if (autoParseEnabled) {
+                    ensureIndexWorkEnqueued();
+                    runOnUiThread(() -> outputView.setText("Offline: indicizzazione in corso..."));
+                } else {
+                    runOnUiThread(() -> outputView.setText("Offline: indicizzazione automatica disattivata"));
+                }
             }
         });
 

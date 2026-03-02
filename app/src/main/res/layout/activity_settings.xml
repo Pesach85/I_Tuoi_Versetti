@@ -39,6 +39,14 @@
                 android:text="@string/settings_intro"
                 android:textColor="@color/on_surface_variant" />
 
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchAutoParseOnStartup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="12dp"
+                android:text="@string/settings_auto_parse_pdf_on_startup" />
+
             <Button
                 android:id="@+id/openBatchBtn"
                 android:layout_width="match_parent"
